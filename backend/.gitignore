@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Tooling caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Environment
+.env
+.env.local
+.env.prod
+
+# uv
+# (uv.lock is committed; the cache/venv are not)
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Claude Code / AI agents
+.claude/
+AGENTS.md
+CLAUDE.md

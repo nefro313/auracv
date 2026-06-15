@@ -1,0 +1,58 @@
+# The backend is stateless (it only calls OpenAI + LlamaParse over HTTP), so
+# there are no databases or volumes. It joins the shared `web` network so the
+# shared Traefik can route to it, plus an isolated `auracv-internal` network
+# that is ready for any future private services (Postgres, Redis, workers …).
+#
+# Deploy:   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: auracv-resume-backend:latest
+    container_name: auracv-backend
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    # No host port mapping — Traefik reaches the container over the `web`
+    # network on the container port below. Nothing is published to the host.
+    expose:
+      - "8000"
+    networks:
+      - web
+      - auracv-internal
+    labels:
+      - "traefik.enable=true"
+      # Tell Traefik which network to use to reach this container (it is on two).
+      - "traefik.docker.network=web"
+      # Router: HTTPS only, Let's Encrypt certificate.
+      - "traefik.http.routers.auracv-backend.rule=Host(`${BACKEND_DOMAIN}`)"
+      - "traefik.http.routers.auracv-backend.entrypoints=websecure"
+      - "traefik.http.routers.auracv-backend.tls=true"
+      - "traefik.http.routers.auracv-backend.tls.certresolver=letsencrypt"
+      # Upstream container port.
+      - "traefik.http.services.auracv-backend.loadbalancer.server.port=8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health').status==200 else 1)",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+networks:
+  # Shared, externally-managed network that Traefik also lives on.
+  # Created once on the server: `docker network create web`
+  web:
+    external: true
+  # Private network for this project's future internal services.
+  # Databases/workers would join ONLY this network, never `web`.
+  auracv-internal:
+    name: auracv-internal
+    driver: bridge
