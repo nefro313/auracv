@@ -12,6 +12,7 @@ interface ResumeCardProps {
   badges?: readonly string[];
   period: string;
   description?: string;
+  tags?: string[];
 }
 
 export const ResumeCard = ({
@@ -23,13 +24,18 @@ export const ResumeCard = ({
   badges,
   period,
   description,
+  tags,
 }: ResumeCardProps) => {
   return (
     <Link href={href || "#"} className="group block">
-      <div className="flex gap-4 rounded-2xl border border-ink/10 bg-white/60 p-5 transition duration-300 hover:-translate-y-0.5 hover:border-ink/20 hover:bg-white hover:shadow-[0_20px_44px_-26px_rgba(33,27,18,0.4)]">
-        <Avatar className="size-12 shrink-0 border border-ink/10 bg-parchment-50">
-          <AvatarImage src={logoUrl} alt={altText} className="object-contain" />
-          <AvatarFallback className="bg-parchment-200 text-sm font-semibold text-ink-soft">
+      <div className="glass-card flex gap-4 rounded-3xl p-5 transition duration-300 hover:-translate-y-1 hover:bg-white/75">
+        <Avatar className="size-12 shrink-0 overflow-hidden rounded-2xl">
+          <AvatarImage
+            src={logoUrl}
+            alt={altText}
+            className="rounded-2xl object-contain"
+          />
+          <AvatarFallback className="glass-tile rounded-2xl font-fraunces text-lg font-medium text-ink">
             {altText[0]}
           </AvatarFallback>
         </Avatar>
@@ -64,6 +70,19 @@ export const ResumeCard = ({
             <p className="mt-2.5 text-sm/relaxed font-medium text-ink-mute">
               {description}
             </p>
+          )}
+
+          {tags && tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {tags.map((tag, index) => (
+                <span
+                  key={`tagResumeCard-${index}`}
+                  className="glass-chip rounded-full px-2.5 py-0.5 text-[0.67rem] font-semibold text-ink-soft"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </div>

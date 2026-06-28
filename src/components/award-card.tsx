@@ -16,7 +16,7 @@ export function AwardCard({
   url,
 }: AwardCardProps) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-ink/10 bg-white/60 p-5 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-ink/20 hover:bg-white hover:shadow-[0_20px_44px_-26px_rgba(33,27,18,0.4)]">
+    <div className="glass-card group relative overflow-hidden rounded-3xl p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white/75">
       {/* Aura accent slides in on hover */}
       <div
         aria-hidden
@@ -53,7 +53,7 @@ export function AwardCard({
         </div>
 
         {date && (
-          <span className="shrink-0 rounded-full bg-parchment-200 px-2.5 py-1 text-xs font-semibold text-ink-soft">
+          <span className="glass-chip shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold text-ink-soft">
             {date}
           </span>
         )}

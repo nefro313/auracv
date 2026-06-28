@@ -3733,7 +3733,7 @@ export default function Home() {
           fullWidth
         >
           <Tab key="template1" className="p-0" title="Portfolio">
-            <Temp1 user={user} />
+            <Temp1 user={user} preview />
           </Tab>
           <Tab key="template2" className="p-0" title="Resume">
             <ResumeTemplate profile={user} />

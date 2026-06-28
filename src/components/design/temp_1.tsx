@@ -8,6 +8,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { UserProfile } from "@/lib/type";
 import { AwardCard } from "@/components/award-card";
+import PillNav from "@/components/ui/pill-nav";
 
 const socialMediaImages: { [key: string]: string } = {
   GitHub: "/icon/github.png",
@@ -43,9 +44,33 @@ function SectionHeading({
   );
 }
 
-export default function page({ user }: { user: UserProfile }) {
+export default function page({
+  user,
+  preview = false,
+}: {
+  user: UserProfile;
+  /** Hide the fixed PillNav when embedded in the editor preview. */
+  preview?: boolean;
+}) {
+  const resumeHref = user.basics.resumeUrl || "/resume";
+
+  const hasWork = user.work.length > 0 && user.work[0].name !== "";
+  const hasProjects =
+    user.projects.projects.length > 0 &&
+    user.projects.projects[0].title !== "";
+  const hasEducation =
+    user.education.length > 0 && user.education[0].institution !== "";
+
+  const navLinks = [
+    { href: "#about", label: "About" },
+    hasWork && { href: "#work", label: "Experience" },
+    hasProjects && { href: "#projects", label: "Work" },
+    hasEducation && { href: "#education", label: "Education" },
+    { href: "#contact", label: "Contact" },
+  ].filter(Boolean) as { href: string; label: string }[];
+
   return (
-    <div className="relative min-h-svh overflow-x-clip bg-parchment-100 font-outfit text-ink antialiased">
+    <div className="relative min-h-svh scroll-smooth overflow-x-clip bg-parchment-100 font-outfit text-ink antialiased">
       {/* Paper grain over everything */}
       <div
         aria-hidden
@@ -62,6 +87,32 @@ export default function page({ user }: { user: UserProfile }) {
         }}
       />
 
+      {/* Liquid colour fields — give the frosted glass something to refract */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-[-9rem] top-[30rem] h-[26rem] w-[26rem] rounded-full opacity-70 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(closest-side, rgba(139,92,246,0.20), transparent 70%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-[-11rem] top-[66rem] h-[30rem] w-[30rem] rounded-full opacity-70 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(closest-side, rgba(6,182,212,0.20), transparent 70%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-[-7rem] top-[112rem] h-[26rem] w-[26rem] rounded-full opacity-60 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(closest-side, rgba(139,92,246,0.16), transparent 70%)",
+        }}
+      />
+
       {/* Editorial hairline frame */}
       <div
         aria-hidden
@@ -72,9 +123,27 @@ export default function page({ user }: { user: UserProfile }) {
         className="absolute inset-y-0 right-8 hidden w-px bg-ink/[0.06] lg:block"
       />
 
-      <main className="relative mx-auto w-full max-w-3xl px-5 pb-28 pt-20 sm:px-8 sm:pt-24">
+      {!preview && (
+        <PillNav
+          logo={user.meta.avatarUrl}
+          logoAlt={user.basics.name}
+          logoText={user.basics.name.slice(0, 1)}
+          items={navLinks}
+          cta={{ label: "Résumé", href: resumeHref }}
+        />
+      )}
+
+      <main
+        className={cn(
+          "relative mx-auto w-full max-w-3xl px-5 pb-24 sm:px-8",
+          preview ? "pt-14 sm:pt-16" : "pt-36 sm:pt-44"
+        )}
+      >
         {/* ---------------- Masthead ---------------- */}
-        <header className="animate-fade-up">
+        <header
+          id="about"
+          className="animate-fade-up flex scroll-mt-24 flex-col items-center text-center"
+        >
           <Avatar className="size-24 border border-ink/10 shadow-[0_18px_50px_-22px_rgba(33,27,18,0.5)] ring-4 ring-white">
             <AvatarImage
               className="h-full w-full object-cover object-top"
@@ -97,7 +166,7 @@ export default function page({ user }: { user: UserProfile }) {
           )}
 
           {/* Quick contact line */}
-          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-ink-soft">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-medium text-ink-soft">
             {user.basics.location?.city && (
               <span className="inline-flex items-center gap-1.5">
                 <svg
@@ -154,13 +223,13 @@ export default function page({ user }: { user: UserProfile }) {
             </p>
           )}
 
-          {/* Skill chips */}
+          {/* Skill chips — a recruiter's first-glance summary of the stack */}
           {user.basics.skills?.length > 0 && (
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
               {user.basics.skills.map((skill: string) => (
                 <span
                   key={skill}
-                  className="rounded-full border border-ink/10 bg-white/60 px-3.5 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-ink/20 hover:text-ink"
+                  className="glass-chip rounded-full px-3.5 py-1.5 text-xs font-semibold text-ink-soft transition hover:text-ink"
                 >
                   {skill}
                 </span>
@@ -169,26 +238,26 @@ export default function page({ user }: { user: UserProfile }) {
           )}
 
           {/* Actions */}
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              target="_blank"
-              href="/resume"
-              className="rounded-full border border-ink/15 bg-white/50 px-6 py-2.5 text-sm font-semibold text-ink transition duration-300 hover:border-ink/30 hover:bg-white"
-            >
-              View résumé
-            </Link>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               href={`mailto:${user.basics.email}`}
               className="rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-parchment-50 transition duration-300 hover:shadow-[0_0_28px_-6px_rgba(139,92,246,0.65)]"
             >
               {user.meta.buttonText || "Get in touch"}
             </Link>
+            <Link
+              target="_blank"
+              href={resumeHref}
+              className="glass-chip rounded-full px-6 py-2.5 text-sm font-semibold text-ink transition duration-300 hover:bg-white/80"
+            >
+              View résumé
+            </Link>
           </div>
         </header>
 
         {/* ---------------- Experience ---------------- */}
-        {user.work.length > 0 && user.work[0].name !== "" && (
-          <section id="work" className="mt-16">
+        {hasWork && (
+          <section id="work" className="mt-20 scroll-mt-24">
             <SectionHeading label="Experience" />
             <div className="space-y-4">
               {user.work.map((work) => (
@@ -201,26 +270,7 @@ export default function page({ user }: { user: UserProfile }) {
                   period={`${work.startDate} - ${work.endDate ?? "Present"}`}
                   description={work.summary}
                   href={work.website}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ---------------- Education ---------------- */}
-        {user.education.length > 0 && user.education[0].institution !== "" && (
-          <section id="education" className="mt-16">
-            <SectionHeading label="Education" />
-            <div className="space-y-4">
-              {user.education.map((education) => (
-                <EducationCard
-                  key={education.institution}
-                  href={education.url}
-                  logoUrl={education.logo}
-                  altText={education.institution}
-                  title={education.institution}
-                  period={`${education.startDate} - ${education.endDate}`}
-                  subtitle={education.area}
+                  tags={work.highlights}
                 />
               ))}
             </div>
@@ -228,18 +278,21 @@ export default function page({ user }: { user: UserProfile }) {
         )}
 
         {/* ---------------- Projects ---------------- */}
-        {user.projects.projects.length > 0 &&
-          user.projects.projects[0].title !== "" && (
-            <section id="projects" className="mt-16">
-              <SectionHeading label="Selected work">
-                {user.projects.description !== ""
-                  ? user.projects.description
-                  : "A few projects I'm proud of — from quick experiments to things people actually use."}
-              </SectionHeading>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {user.projects.projects.map((project) => (
+        {hasProjects && (
+          <section id="projects" className="mt-20 scroll-mt-24">
+            <SectionHeading label="Selected work">
+              {user.projects.description !== ""
+                ? user.projects.description
+                : "A few projects I'm proud of — from quick experiments to things people actually use."}
+            </SectionHeading>
+            {/* Lead project runs full width; the rest fall into a two-up grid. */}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              {user.projects.projects.map((project, index) => (
+                <div
+                  key={project.title}
+                  className={index === 0 ? "sm:col-span-2" : ""}
+                >
                   <ProjectCard
-                    key={project.title}
                     title={project.title}
                     description={project.description}
                     duration={project.duration}
@@ -249,15 +302,16 @@ export default function page({ user }: { user: UserProfile }) {
                     website={project.website}
                     source={project.source}
                   />
-                ))}
-              </div>
-            </section>
-          )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ---------------- Hackathons ---------------- */}
         {user.hackathons.hackathons.length > 0 &&
           user.hackathons.hackathons[0].title !== "" && (
-            <section id="hackathons" className="mt-16">
+            <section id="hackathons" className="mt-20 scroll-mt-24">
               <SectionHeading label="Hackathons">
                 {user.hackathons.description !== ""
                   ? user.hackathons.description
@@ -282,7 +336,7 @@ export default function page({ user }: { user: UserProfile }) {
 
         {/* ---------------- Awards ---------------- */}
         {user.awards && user.awards.length > 0 && user.awards[0].title !== "" && (
-          <section id="awards" className="mt-16">
+          <section id="awards" className="mt-20 scroll-mt-24">
             <SectionHeading label="Awards & certifications">
               Recognitions and credentials earned along the way.
             </SectionHeading>
@@ -300,9 +354,29 @@ export default function page({ user }: { user: UserProfile }) {
           </section>
         )}
 
+        {/* ---------------- Education ---------------- */}
+        {hasEducation && (
+          <section id="education" className="mt-20 scroll-mt-24">
+            <SectionHeading label="Education" />
+            <div className="space-y-4">
+              {user.education.map((education) => (
+                <EducationCard
+                  key={education.institution}
+                  href={education.url}
+                  logoUrl={education.logo}
+                  altText={education.institution}
+                  title={education.institution}
+                  period={`${education.startDate} - ${education.endDate}`}
+                  subtitle={education.area}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* ---------------- Contact ---------------- */}
-        <section id="contact" className="mt-20">
-          <div className="relative overflow-hidden rounded-[2rem] bg-ink px-7 py-14 text-center sm:px-12">
+        <section id="contact" className="mt-24 scroll-mt-24">
+          <div className="relative overflow-hidden rounded-[2rem] bg-ink px-7 py-16 text-center sm:px-12">
             <div
               aria-hidden
               className="absolute -bottom-24 -right-16 h-64 w-80 rounded-full blur-3xl"
@@ -316,14 +390,23 @@ export default function page({ user }: { user: UserProfile }) {
               className="absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-white/10"
             />
             <h2 className="relative font-fraunces text-3xl font-medium tracking-tight text-parchment-50 sm:text-4xl">
-              Get in touch
+              Let&rsquo;s build something together.
             </h2>
-            <p className="relative mx-auto mt-3 max-w-md text-sm font-medium text-parchment-300/90">
-              Have an opportunity or just want to say hello? I&rsquo;d love to
-              hear from you.
+            <p className="relative mx-auto mt-4 max-w-md text-sm font-medium text-parchment-300/90">
+              Currently open to new opportunities. Have a role in mind or just
+              want to say hello? I&rsquo;d love to hear from you.
             </p>
 
-            <div className="relative mt-8 flex items-center justify-center gap-3">
+            <div className="relative mt-8 flex justify-center">
+              <Link
+                href={"mailto:" + user.basics.email}
+                className="rounded-full bg-parchment-50 px-7 py-3 text-sm font-semibold text-ink transition duration-300 hover:shadow-[0_0_30px_-4px_rgba(139,92,246,0.7)]"
+              >
+                Say hello
+              </Link>
+            </div>
+
+            <div className="relative mt-9 flex items-center justify-center gap-3">
               <Link
                 href={"mailto:" + user.basics.email}
                 target="_blank"
@@ -370,18 +453,47 @@ export default function page({ user }: { user: UserProfile }) {
               )}
             </div>
           </div>
+        </section>
+      </main>
 
-          <p className="mt-8 text-center text-xs font-medium text-ink-mute">
-            Built with{" "}
+      {/* ---------------- Footer ---------------- */}
+      <footer className="relative border-t border-ink/10">
+        <div className="mx-auto flex max-w-3xl flex-col items-center justify-between gap-4 px-5 py-8 sm:flex-row sm:px-8">
+          <p className="text-xs font-medium text-ink-mute">
+            © {new Date().getFullYear()} {user.basics.name}. Built with{" "}
             <Link
               href="https://auracv.me"
               className="font-semibold text-aura-gradient"
             >
               AuraCV
             </Link>
+            .
           </p>
-        </section>
-      </main>
+          <div className="flex items-center gap-5 text-xs font-semibold text-ink-mute">
+            {user.basics.email && (
+              <a
+                href={`mailto:${user.basics.email}`}
+                className="transition hover:text-ink"
+              >
+                Email
+              </a>
+            )}
+            {user.basics.profiles.map(
+              (profile) =>
+                profile.url && (
+                  <Link
+                    key={profile.network}
+                    href={profile.url}
+                    target="_blank"
+                    className="transition hover:text-ink"
+                  >
+                    {profile.network}
+                  </Link>
+                )
+            )}
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
