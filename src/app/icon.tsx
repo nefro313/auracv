@@ -67,8 +67,15 @@ function brandIcon() {
 // Image generation
 export default async function Icon() {
   const headersList = await headers();
-  const userName = headersList.get("x-forwarded-host")?.split(".")[0];
-  const isDev = userName?.includes("localhost");
+  // `x-current-path` is the subdomain set by the proxy middleware (the same
+  // header every portfolio page reads); fall back to the forwarded host.
+  const hostHeader =
+    headersList.get("x-current-path") ||
+    headersList.get("x-forwarded-host") ||
+    headersList.get("host") ||
+    "";
+  const userName = hostHeader.split(".")[0];
+  const isDev = hostHeader.includes("localhost");
 
   try {
     if (userName === "www" || userName === "auracv" || isDev) {

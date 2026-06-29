@@ -3,6 +3,7 @@
 import { Button, Input } from "@nextui-org/react";
 import React from "react";
 import { useEditor } from "../EditorContext";
+import RemoveButton from "../RemoveButton";
 
 export default function InterestsSection() {
   const {
@@ -16,7 +17,7 @@ export default function InterestsSection() {
   return (
           <div
             id="interests"
-            className="flex flex-col pt-11 justify-center items-start gap-4"
+            className="scroll-mt-20 flex flex-col pt-11 justify-center items-start gap-4"
           >
             <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
               Interests
@@ -29,27 +30,8 @@ export default function InterestsSection() {
                   className="flex flex-col w-full gap-4 border border-ink/10 bg-parchment-100/40 rounded-2xl p-5"
                 >
                   <div className="w-full flex justify-end">
-                    <button
-                      onClick={() =>
-                        deleteItemByIndex("interests", index, setUser)
-                      }
-                      aria-label={`Delete interest ${index}`}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-6 text-red-400"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                        />
-                      </svg>
-                    </button>
+                    <RemoveButton onClick={() =>
+                        deleteItemByIndex("interests", index, setUser)} label={`Delete interest ${index}`} />
                   </div>
                   <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
                     <p className="pt-.05">Interest Name</p>
@@ -57,6 +39,7 @@ export default function InterestsSection() {
                       type="text"
                       variant="bordered"
                       value={interest.name}
+                      placeholder="e.g. Photography"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleInputChange(
                           "interests",
@@ -98,7 +81,7 @@ export default function InterestsSection() {
             <Button
               variant="bordered"
               onPress={addInterests}
-              className="border border-dashed border-ink/25 bg-none rounded-full flex justify-center items-center gap-1 text-sm font-semibold text-ink-soft hover:border-aura-violet/50 hover:text-ink transition-colors"
+              className="group border border-dashed border-ink/25 bg-none rounded-full flex justify-center items-center gap-1 text-sm font-semibold text-ink-soft transition-all duration-200 ease-out hover:border-aura-violet/60 hover:bg-aura-violet/5 hover:text-ink hover:scale-[1.02] active:scale-95"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +89,7 @@ export default function InterestsSection() {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="size-5 text-ink-soft"
+                className="size-5 text-ink-soft transition-transform duration-200 ease-out group-hover:rotate-90"
               >
                 <path
                   strokeLinecap="round"

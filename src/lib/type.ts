@@ -128,6 +128,9 @@ export type Basics = {
   location: Location;
   profiles: Profile[];
   skills: string[];
+  // Whether the person is currently open to work (shown as a badge on the
+  // portfolio). Optional so existing saved profiles stay valid.
+  openToWork?: boolean;
 };
 
 // Certificates

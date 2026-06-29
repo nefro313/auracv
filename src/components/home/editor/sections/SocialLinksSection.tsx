@@ -14,7 +14,7 @@ export default function SocialLinksSection() {
   return (
           <div
             id="social-links"
-            className="flex flex-col pb-6 pt-11 justify-center items-start gap-4"
+            className="scroll-mt-20 flex flex-col pb-6 pt-11 justify-center items-start gap-4"
           >
             <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
               Social Links

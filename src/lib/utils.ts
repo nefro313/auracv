@@ -66,6 +66,7 @@ export const initialUserState: UserProfile =
     website: "",
     resumeUrl: "",
     email: "",
+    openToWork: false,
     skills: [],
     location: {
       city: "",

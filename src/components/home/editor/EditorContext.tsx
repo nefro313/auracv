@@ -55,6 +55,7 @@ export interface EditorContextValue {
   ) => Promise<void>;
   handleRemoveProfilePhoto: () => void;
   deleteItemByIndex: (path: string, index: number, setState: SetUser) => void;
+  markAsEdited: () => void;
 
   // Skills
   handleSkillClose: (skillName: string, skillToRemove: string) => void;

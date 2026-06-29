@@ -27,6 +27,7 @@ export default function LeftPanel() {
           <NavItem
             name="Home"
             displayName="Home"
+            href="/studio"
             icon={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -75,17 +76,20 @@ const NavItem = ({
   name,
   displayName,
   icon,
+  href,
 }: {
   name: string;
   displayName: string;
   icon: React.JSX.Element;
+  href?: string;
 }) => {
+  const target = href ?? `/${name.toLowerCase()}`;
   const pathname = usePathname();
-  let page = pathname.split("/")[1];
-  const isSelected = page === name.toLowerCase();
+  const page = pathname.split("/")[1];
+  const isSelected = page === target.split("/")[1];
 
   return (
-    <Link href={`/${name.toLowerCase()}`}>
+    <Link href={target}>
       <button
         className={`flex gap-2 items-center p-4 justify-center w-full rounded-xl transition-colors ${
           isSelected

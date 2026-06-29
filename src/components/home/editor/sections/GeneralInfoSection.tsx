@@ -1,6 +1,6 @@
 "use client";
 
-import { Chip, Input, Kbd, Spinner, Textarea } from "@nextui-org/react";
+import { Chip, Input, Kbd, Spinner, Switch, Textarea } from "@nextui-org/react";
 import { ChangeEvent } from "react";
 import { UserMetaData } from "@/lib/type";
 import { tailwindColors } from "@/lib/utils";
@@ -27,12 +27,13 @@ export default function GeneralInfoSection() {
     handleSkillClose,
     handleSkillInputChange,
     handleSkillInputKeyDown,
+    markAsEdited,
   } = useEditor();
 
   return (
           <div
             id="general-info"
-            className="flex flex-col pt-6 sm:pt-11 justify-center items-start gap-4"
+            className="scroll-mt-20 flex flex-col pt-6 sm:pt-11 justify-center items-start gap-4"
           >
             <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
               General Info
@@ -131,6 +132,7 @@ export default function GeneralInfoSection() {
               <Input
                 type="text"
                 variant="bordered"
+                placeholder="e.g. Ada Lovelace"
                 value={user.basics.name}
                 onChange={(e) =>
                   handleInputChange("basics.name", -1, "", e.target.value)
@@ -149,6 +151,7 @@ export default function GeneralInfoSection() {
                 type="text"
                 variant="bordered"
                 value={user.meta.userName}
+                placeholder="yourname"
                 onChange={(e) => {
                   // Clear any stale availability state while the user edits.
                   setSlugError(false);
@@ -209,7 +212,7 @@ export default function GeneralInfoSection() {
               <Input
                 type="text"
                 variant="bordered"
-                defaultValue="Product designer"
+                placeholder="e.g. Product Designer"
                 value={user.basics.label}
                 onChange={(e) =>
                   handleInputChange("basics.label", -1, "", e.target.value)
@@ -223,6 +226,31 @@ export default function GeneralInfoSection() {
               />
             </div>
             <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
+              <p className="pt-.05">Availability</p>
+              <div className="flex max-w-xs w-full items-center justify-between gap-3 rounded-medium border-1 border-ink/15 bg-white px-3.5 py-2.5">
+                <span className="text-ink-soft">
+                  {user.basics.openToWork
+                    ? "Open to work — shown on your portfolio"
+                    : "Open to work"}
+                </span>
+                <Switch
+                  size="sm"
+                  aria-label="Open to work"
+                  isSelected={!!user.basics.openToWork}
+                  onValueChange={(val) => {
+                    markAsEdited();
+                    setUser((prev) => ({
+                      ...prev,
+                      basics: { ...prev.basics, openToWork: val },
+                    }));
+                  }}
+                  classNames={{
+                    wrapper: "group-data-[selected=true]:bg-aura-violet",
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
               <p className="pt-.05">About</p>
               <Textarea
                 variant="bordered"
@@ -233,7 +261,6 @@ export default function GeneralInfoSection() {
                   handleInputChange("basics.about", -1, "", e.target.value)
                 }
                 name="about"
-                defaultValue="NextUI is a React UI library that provides a set of accessible, reusable, and beautiful components."
                 className="max-w-xs text-ink-soft"
                 classNames={{
                   inputWrapper:
@@ -291,6 +318,7 @@ export default function GeneralInfoSection() {
               <Input
                 type="email"
                 variant="bordered"
+                placeholder="you@example.com"
                 value={user.basics.email}
                 onChange={(e) =>
                   handleInputChange("basics.email", -1, "", e.target.value)

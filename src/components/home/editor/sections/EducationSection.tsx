@@ -3,7 +3,9 @@
 import { Button, Input } from "@nextui-org/react";
 import React from "react";
 import { ACCEPTED_IMAGE_INPUT } from "../constants";
+import { MonthRangePicker } from "../DatePicker";
 import { useEditor } from "../EditorContext";
+import RemoveButton from "../RemoveButton";
 
 export default function EducationSection() {
   const {
@@ -19,7 +21,7 @@ export default function EducationSection() {
   return (
           <div
             id="education"
-            className="flex flex-col  pt-11 justify-center items-start gap-4"
+            className="scroll-mt-20 flex flex-col  pt-11 justify-center items-start gap-4"
           >
             <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
               Education
@@ -33,27 +35,8 @@ export default function EducationSection() {
                 >
                   {" "}
                   <div className="w-full flex justify-end">
-                    <button
-                      onClick={() =>
-                        deleteItemByIndex("education", index, setUser)
-                      }
-                      aria-label={`Delete education ${index}`}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-6 text-red-400"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                        />
-                      </svg>
-                    </button>
+                    <RemoveButton onClick={() =>
+                        deleteItemByIndex("education", index, setUser)} label={`Delete education ${index}`} />
                   </div>
                   <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
                     <p className="pt-.05">College Logo</p>
@@ -129,6 +112,7 @@ export default function EducationSection() {
                       type="text"
                       variant="bordered"
                       value={edu.institution}
+                      placeholder="School / University"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleInputChange(
                           "education",
@@ -150,6 +134,7 @@ export default function EducationSection() {
                       type="text"
                       variant="bordered"
                       value={edu.area}
+                      placeholder="Field of study"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleInputChange(
                           "education",
@@ -167,45 +152,19 @@ export default function EducationSection() {
                   </div>{" "}
                   <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
                     <p className="pt-.05">Period</p>
-                    <div className="max-w-xs flex gap-2 text-ink-soft">
-                      {" "}
-                      <Input
-                        classNames={{
-                          inputWrapper:
-                            "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
-                        }}
-                        placeholder="Start eg: April 2020"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    <div className="max-w-xs w-full text-ink-soft">
+                      <MonthRangePicker
+                        start={edu.startDate}
+                        end={edu.endDate}
+                        onChange={(start, end) => {
                           handleInputChange(
                             "education",
                             index,
                             "startDate",
-                            e.target.value,
-                          )
-                        }
-                        value={edu.startDate}
-                        variant="bordered"
-                        className="max-w-xs text-ink-soft"
-                        // value={[experience.start, experience.end]}
-                      />
-                      <Input
-                        classNames={{
-                          inputWrapper:
-                            "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                            start,
+                          );
+                          handleInputChange("education", index, "endDate", end);
                         }}
-                        placeholder="end"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          handleInputChange(
-                            "education",
-                            index,
-                            "endDate",
-                            e.target.value,
-                          )
-                        }
-                        value={edu.endDate}
-                        variant="bordered"
-                        className="max-w-xs text-ink-soft"
-                        // value={[experience.start, experience.end]}
                       />
                     </div>
                   </div>
@@ -214,7 +173,7 @@ export default function EducationSection() {
             <Button
               variant="bordered"
               onPress={addEducation}
-              className="border border-dashed border-ink/25 bg-none rounded-full flex justify-center items-center gap-1 text-sm font-semibold text-ink-soft hover:border-aura-violet/50 hover:text-ink transition-colors"
+              className="group border border-dashed border-ink/25 bg-none rounded-full flex justify-center items-center gap-1 text-sm font-semibold text-ink-soft transition-all duration-200 ease-out hover:border-aura-violet/60 hover:bg-aura-violet/5 hover:text-ink hover:scale-[1.02] active:scale-95"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -222,7 +181,7 @@ export default function EducationSection() {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="size-5 text-ink-soft"
+                className="size-5 text-ink-soft transition-transform duration-200 ease-out group-hover:rotate-90"
               >
                 <path
                   strokeLinecap="round"

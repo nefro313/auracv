@@ -1040,6 +1040,7 @@ export default function Home() {
     handleFileUpload,
     handleRemoveProfilePhoto,
     deleteItemByIndex,
+    markAsEdited,
     handleSkillClose,
     handleSkillInputChange,
     handleSkillInputKeyDown,
