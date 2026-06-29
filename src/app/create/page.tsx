@@ -16,7 +16,7 @@ import { Tabs, Tab } from "@nextui-org/react";
 import AnimatedCircularProgressBar from "@/components/magicui/animated-circular-progress-bar";
 import withAuth from "@/utils/authProtect";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/use-toast";
+import { useNotifications } from "@/components/ui/notification";
 import { link } from "fs";
 interface User {
   userId: string;
@@ -46,7 +46,7 @@ function describeError(error: unknown): string {
 function Page() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { toast } = useToast();
+  const { notify, viewport: notificationViewport } = useNotifications();
   const { userData } = useCommonContext();
   const confettiRef = useRef<ConfettiRef>(null);
   const [shopSlug, setShopSlug] = useState("");
@@ -133,7 +133,7 @@ function Page() {
         return;
       }
       if (data.length > 0) {
-        router.push("/home");
+        router.push("/studio");
         return;
       }
       if (data.length === 0) {
@@ -404,20 +404,22 @@ function Page() {
     }
 
     if (!error) {
-      router.push("/home");
+      router.push("/studio");
     }
   };
 
   const generateai = async () => {
     if (!resumeUrl) {
-      toast({
+      notify({
+        variant: "warning",
         title: "Resume required",
         description: "Please upload your resume (PDF) to generate your portfolio.",
       });
       return;
     }
     if (!shopSlug) {
-      toast({
+      notify({
+        variant: "warning",
         title: "Portfolio domain required",
         description: "Please enter your portfolio domain.",
       });
@@ -506,8 +508,8 @@ function Page() {
 
         if (error) {
           console.error("Error inserting user:", error);
-          toast({
-            variant: "destructive",
+          notify({
+            variant: "error",
             title: "Couldn't save your portfolio",
             description:
               "Your resume was parsed but we couldn't save it. Please try again.",
@@ -517,13 +519,13 @@ function Page() {
           return null;
         }
         setValue(100);
-        router.push("/home");
+        router.push("/studio");
 
         console.log("AI Generated Result:", result);
       } catch (error) {
         console.error("Error in AI generation:", error);
-        toast({
-          variant: "destructive",
+        notify({
+          variant: "error",
           title: "Couldn't generate your portfolio",
           description: describeError(error),
         });
@@ -536,6 +538,7 @@ function Page() {
 
   return (
     <div className="flex h-screen w-full flex-col bg-parchment-100 font-outfit text-ink antialiased">
+      {notificationViewport}
       <div>
         <Navbar />
       </div>

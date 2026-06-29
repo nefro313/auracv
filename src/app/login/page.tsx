@@ -11,7 +11,7 @@ export default function page() {
   const router = useRouter();
   const { userData } = useCommonContext();
   if (userData) {
-    router.push("/home");
+    router.push("/studio");
   }
   const SigninWithGoogle = async () => {
     setLoading(true);

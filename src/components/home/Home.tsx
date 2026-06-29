@@ -36,7 +36,7 @@ import { supabase } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
 import { useCommonContext } from "@/Common_context";
 import imageCompression from "browser-image-compression";
-import { useToast } from "@/components/ui/use-toast";
+import { useNotifications } from "@/components/ui/notification";
 import Temp1 from "@/components/design/temp_1";
 import { useRouter } from "next/navigation";
 import { tailwindColors } from "@/lib/utils";
@@ -45,6 +45,36 @@ import ResumeTemplate from "../ResumeTemplate";
 
 const initialUploadStatus: IndexedUploadStatus = {
   "profilePhoto-0": "idle",
+};
+
+// Image upload constraints. Raster image formats are accepted up to the size
+// cap below; SVG and WebP are explicitly rejected.
+const MAX_IMAGE_SIZE_MB = 5;
+const ACCEPTED_IMAGE_INPUT = "image/png,image/jpeg,image/jpg,image/gif,image/bmp";
+const BLOCKED_IMAGE_TYPES = ["image/svg+xml", "image/webp"];
+const BLOCKED_IMAGE_EXTENSIONS = ["svg", "webp"];
+
+// Returns an error message when the file is not an acceptable image, else null.
+const validateImageFile = (file: File | undefined | null): string | null => {
+  if (!file) return "No file was selected.";
+
+  const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+  const isImage = file.type.startsWith("image/");
+
+  if (
+    !isImage ||
+    BLOCKED_IMAGE_TYPES.includes(file.type) ||
+    BLOCKED_IMAGE_EXTENSIONS.includes(extension)
+  ) {
+    return "Unsupported format. Use PNG, JPG, JPEG, GIF or BMP — SVG and WebP aren't allowed.";
+  }
+
+  if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    return `Image is too large (${sizeMb}MB). Maximum allowed size is ${MAX_IMAGE_SIZE_MB}MB.`;
+  }
+
+  return null;
 };
 
 const compressImage = async (file: File) => {
@@ -92,12 +122,11 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState("Already taken!");
   const [isAvailable, setIsAvailable] = useState(false);
   const [userMetaData, setUserMetaData] = useState<any>(null);
-  const isError = slugError || isChecking;
   const [githubData, setGithubData] = useState<any>(null);
   const [githubUsername, setGithubUsername] = useState("");
   const [githubLoading, setGithubLoading] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
+  const { notify, viewport: notificationViewport } = useNotifications();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -240,6 +269,16 @@ export default function Home() {
     type: PhotoTypes,
     index: number,
   ) => {
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      notify({
+        variant: "error",
+        title: "Couldn't upload image",
+        description: validationError,
+      });
+      return;
+    }
+
     const randomNumber = Math.floor(Math.random() * 900) + 100;
     const path = `user/${userData?.user.id}/${type}_${randomNumber}`;
 
@@ -330,6 +369,23 @@ export default function Home() {
         [`${type}-${index}`]: "idle",
       }));
     }
+  };
+
+  const handleRemoveProfilePhoto = () => {
+    markAsEdited();
+    setUser((prevUser) => ({
+      ...prevUser,
+      basics: { ...prevUser.basics, avatarUrl: "" },
+      meta: { ...prevUser.meta, avatarUrl: "" },
+    }));
+    setUserMetaData((prevUserMetaData: UserMetaData) => ({
+      ...prevUserMetaData,
+      avatarUrl: "",
+    }));
+    setUploadStatus((prevStatus) => ({
+      ...prevStatus,
+      "profilePhoto-0": "idle",
+    }));
   };
 
   const handleSkillClose = (skillName: string, skillToRemove: string) => {
@@ -758,6 +814,33 @@ export default function Home() {
   const handleSaveChanges = async () => {
     console.log("Saving changes...");
 
+    // Required fields must be filled before a portfolio can be saved.
+    const missingFields: string[] = [];
+    if (!user.basics.name?.trim()) missingFields.push("Full name");
+    if (!user.meta.userName?.trim()) missingFields.push("User name");
+    if (!user.basics.label?.trim()) missingFields.push("Your role");
+    if (!user.basics.email?.trim()) missingFields.push("Contact email");
+
+    if (missingFields.length > 0) {
+      notify({
+        variant: "warning",
+        title: "Required fields missing",
+        description: `Please fill in: ${missingFields.join(", ")}.`,
+      });
+      return;
+    }
+
+    // Block saving when the chosen username is taken / reserved.
+    if (slugError) {
+      notify({
+        variant: "error",
+        title: "Username unavailable",
+        description:
+          "That user name is already taken. Pick another one before saving.",
+      });
+      return;
+    }
+
     let userUpdateSuccess = true;
 
     if (Object.keys(user).length > 0) {
@@ -794,7 +877,8 @@ export default function Home() {
       if (error) {
         console.error("Error updating user data:", error);
         userUpdateSuccess = false;
-        toast({
+        notify({
+          variant: "error",
           title: "Error saving changes",
           description: error.message,
         });
@@ -802,18 +886,17 @@ export default function Home() {
         setHasUnsavedChanges(false);
         setUser(repairedUser);
         setInitialUser(JSON.parse(JSON.stringify(repairedUser)));
-        toast({
+        notify({
+          variant: "success",
           title: "Changes saved successfully!",
           description: (
-            <div className="rounded-xl py-3 font-dmSans">
-              <Link
-                target="_blank"
-                href={`https://${user.meta.userName}.auracv.me`}
-                className="bg-green-100 border  border-ink/10 text-ink font-semibold px-4 py-2 rounded-xl  cursor-pointer hover:bg-green-200 hover:text-ink-soft"
-              >
-                Visit your auracv
-              </Link>
-            </div>
+            <Link
+              target="_blank"
+              href={`https://${user.meta.userName}.auracv.me`}
+              className="mt-1 inline-block rounded-lg bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700 transition-colors hover:bg-emerald-100"
+            >
+              Visit your auracv ↗
+            </Link>
           ),
         });
         console.log("User data updated successfully:", data);
@@ -825,7 +908,7 @@ export default function Home() {
     } else {
       console.log("Some changes failed to save");
     }
-  };
+  };;
 
   const checkSlugUnique = async (slug: string): Promise<boolean> => {
     if (slug === initialUser.meta.userName) {
@@ -852,16 +935,40 @@ export default function Home() {
   };
 
   const handleBlur = async () => {
+    if (user.meta.userName === "") {
+      setIsAvailable(false);
+      setSlugError(false);
+      notify({
+        variant: "warning",
+        title: "User name required",
+        description: "Choose a user name for your portfolio URL.",
+      });
+      return;
+    }
+
     setIsChecking(true);
     const isUnique = await checkSlugUnique(user.meta.userName);
     setIsChecking(false);
-    if (user.meta.userName === "") {
-      setIsAvailable(false);
-    }
-    if (isUnique && user.meta.userName !== "") {
-      setIsAvailable(isUnique);
-    }
+
+    setIsAvailable(isUnique);
     setSlugError(!isUnique);
+
+    if (isUnique) {
+      // Don't re-announce the user's own unchanged username.
+      if (user.meta.userName !== initialUser.meta.userName) {
+        notify({
+          variant: "success",
+          title: "User name available",
+          description: `${user.meta.userName}.auracv.me is all yours.`,
+        });
+      }
+    } else {
+      notify({
+        variant: "error",
+        title: "User name taken",
+        description: `${user.meta.userName}.auracv.me is unavailable. Try another.`,
+      });
+    }
   };
 
   if (isLoading) {
@@ -937,6 +1044,7 @@ export default function Home() {
 
   return (
     <div className="grid grid-cols-5 font-outfit w-full h-full overflow-hidden bg-parchment-100 text-ink">
+      {notificationViewport}
       <div className="col-span-1 hidden sm:block border-r border-ink/10 h-full overflow-y-auto px-8 py-12">
         <div>
           <p className="mb-6 pl-1 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-ink-mute">
@@ -1114,15 +1222,40 @@ export default function Home() {
             id="general-info"
             className="flex flex-col pt-6 sm:pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">General Info</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              General Info
+            </h2>
             <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-              <p className="pt-.05">Profile photo</p>
+              <p className="pt-.05">Profile Photo</p>
               <div className="flex max-w-xs w-full justify-start  gap-2 items-center flex-row flex-wrap">
                 {user.meta.avatarUrl ? (
-                  <img
-                    src={user.meta.avatarUrl}
-                    className="w-12 h-12 sm:h-12 sm:w-12 rounded-xl object-cover"
-                  />
+                  <div className="relative w-12 h-12 sm:h-12 sm:w-12 group/photo">
+                    <img
+                      src={user.meta.avatarUrl}
+                      className="w-12 h-12 sm:h-12 sm:w-12 rounded-xl object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveProfilePhoto}
+                      aria-label="Remove profile photo"
+                      className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border border-ink/15 text-red-400 shadow-sm hover:bg-red-50 hover:border-red-300 transition-colors"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        className="size-3"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18 18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 ) : (
                   <div className="w-12 h-12 flex items-center justify-center  bg-parchment-200 rounded-xl">
                     <svg
@@ -1175,13 +1308,14 @@ export default function Home() {
                       }
                     }}
                     type="file"
+                    accept={ACCEPTED_IMAGE_INPUT}
                     className="  w-full hidden  font-body font-light text-ink/80 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-parchment-300 file:text-ink-soft hover:file:bg-ink-mute"
                   />
                 </label>
               </div>
             </div>{" "}
             <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-              <p className="pt-.05">Full name</p>
+              <p className="pt-.05">Full Name</p>
               <Input
                 type="text"
                 variant="bordered"
@@ -1198,12 +1332,15 @@ export default function Home() {
               />
             </div>{" "}
             <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-              <p className="pt-.05">User name</p>
+              <p className="pt-.05">Username</p>
               <Input
                 type="text"
                 variant="bordered"
                 value={user.meta.userName}
                 onChange={(e) => {
+                  // Clear any stale availability state while the user edits.
+                  setSlugError(false);
+                  setIsAvailable(false);
                   setUserMetaData((prevUserMetaData: UserMetaData) => ({
                     ...prevUserMetaData,
                     userName: e.target.value.toLowerCase().replace(/\s+/g, ""),
@@ -1216,7 +1353,7 @@ export default function Home() {
                   );
                 }}
                 name="userName"
-                isInvalid={isError}
+                isInvalid={slugError}
                 errorMessage={errorMessage}
                 onBlur={handleBlur}
                 className="max-w-xs flex  text-ink-soft"
@@ -1229,21 +1366,25 @@ export default function Home() {
                     <span className="text-default-600 font-semibold text-sm">
                       .auracv.me
                     </span>
-                    {isAvailable && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-6 text-aura-cyan"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                        />
-                      </svg>
+                    {isChecking ? (
+                      <Spinner size="sm" color="default" className="size-6" />
+                    ) : (
+                      isAvailable && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="size-6 text-aura-cyan"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                          />
+                        </svg>
+                      )
                     )}
                   </div>
                 }
@@ -1252,7 +1393,7 @@ export default function Home() {
               />
             </div>
             <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-              <p className="pt-.05">Your role</p>
+              <p className="pt-.05">Your Role</p>
               <Input
                 type="text"
                 variant="bordered"
@@ -1306,7 +1447,7 @@ export default function Home() {
                   }
                   classNames={{
                     inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                      "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                   }}
                   endContent={
                     <Kbd className="font-dmSans text-xs" keys={["enter"]}>
@@ -1334,7 +1475,7 @@ export default function Home() {
               </div>
             </div>
             <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-              <p className="pt-.05">Contact mail</p>
+              <p className="pt-.05">Contact Mail</p>
               <Input
                 type="email"
                 variant="bordered"
@@ -1369,7 +1510,7 @@ export default function Home() {
                   className="flex-1 text-ink-soft"
                   classNames={{
                     inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                      "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                   }}
                 />
                 <Input
@@ -1410,7 +1551,7 @@ export default function Home() {
               />
             </div>
             <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-              <p className="pt-.05">Theme color</p>
+              <p className="pt-.05">Theme Color</p>
               <div className="flex flex-wrap max-w-xs gap-4">
                 {tailwindColors.map((color, index) => (
                   <div
@@ -1443,7 +1584,9 @@ export default function Home() {
             id="work-experience"
             className="flex min-h-screen flex-col pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">Work expirience</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Work Experience
+            </h2>
             {user.work &&
               user.work.length > 0 &&
               user.work.map((experience, index) => (
@@ -1454,9 +1597,7 @@ export default function Home() {
                   {" "}
                   <div className="w-full flex justify-end">
                     <button
-                      onClick={() =>
-                        deleteItemByIndex("work", index, setUser)
-                      }
+                      onClick={() => deleteItemByIndex("work", index, setUser)}
                       aria-label={`Delete workExperience ${index}`}
                     >
                       <svg
@@ -1476,7 +1617,7 @@ export default function Home() {
                     </button>
                   </div>
                   <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-                    <p className="pt-0.05">Company logo</p>
+                    <p className="pt-0.05">Company Logo</p>
                     <div className="flex max-w-xs w-full justify-start gap-2 items-center flex-row flex-wrap">
                       {experience.logo ? (
                         <img
@@ -1514,6 +1655,7 @@ export default function Home() {
                             }
                           }}
                           type="file"
+                          accept={ACCEPTED_IMAGE_INPUT}
                           className="  w-full hidden  font-body font-light text-ink/80 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-parchment-300 file:text-ink-soft hover:file:bg-ink-mute"
 
                           // {...getInputProps()}
@@ -1544,7 +1686,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-                    <p className="pt-0.05">Company name</p>
+                    <p className="pt-0.05">Company Name</p>
                     <Input
                       type="text"
                       variant="bordered"
@@ -1552,7 +1694,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleInputChange("work", index, "name", e.target.value)
@@ -1569,7 +1711,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleInputChange(
@@ -1588,7 +1730,7 @@ export default function Home() {
                       <Input
                         classNames={{
                           inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                            "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                         }}
                         placeholder="Start eg: April 2020"
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -1607,7 +1749,7 @@ export default function Home() {
                       <Input
                         classNames={{
                           inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                            "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                         }}
                         placeholder="end"
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -1643,7 +1785,7 @@ export default function Home() {
                       }
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -1656,7 +1798,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleInputChange(
@@ -1696,7 +1838,9 @@ export default function Home() {
             id="education"
             className="flex flex-col  pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">Education</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Education
+            </h2>
             {user.education &&
               user.education.length > 0 &&
               user.education.map((edu, index) => (
@@ -1729,7 +1873,7 @@ export default function Home() {
                     </button>
                   </div>
                   <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-                    <p className="pt-.05">College logo</p>
+                    <p className="pt-.05">College Logo</p>
                     <div className="flex max-w-xs w-full justify-start gap-2 items-center flex-row flex-wrap">
                       {edu.logo ? (
                         <img
@@ -1768,6 +1912,7 @@ export default function Home() {
                             }
                           }}
                           type="file"
+                          accept={ACCEPTED_IMAGE_INPUT}
                           className="  w-full hidden  font-body font-light text-ink/80 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-parchment-300 file:text-ink-soft hover:file:bg-ink-mute"
                         />
                         <svg
@@ -1796,7 +1941,7 @@ export default function Home() {
                     </div>
                   </div>{" "}
                   <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-                    <p className="pt-.05">College name</p>
+                    <p className="pt-.05">College Name</p>
                     <Input
                       type="text"
                       variant="bordered"
@@ -1812,12 +1957,12 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
                   <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
-                    <p className="pt-.05">Area of Study</p>
+                    <p className="pt-.05">Field of Study</p>
                     <Input
                       type="text"
                       variant="bordered"
@@ -1833,7 +1978,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>{" "}
@@ -1844,7 +1989,7 @@ export default function Home() {
                       <Input
                         classNames={{
                           inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                            "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                         }}
                         placeholder="Start eg: April 2020"
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -1863,7 +2008,7 @@ export default function Home() {
                       <Input
                         classNames={{
                           inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                            "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                         }}
                         placeholder="end"
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -1909,7 +2054,9 @@ export default function Home() {
             id="project"
             className="flex flex-col pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">Projects</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Projects
+            </h2>
             <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
               <p className="pt-0.5">Project description</p>
               <Textarea
@@ -1918,9 +2065,9 @@ export default function Home() {
                 value={user.projects.description}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleInputChange(
-                    "projects",
-                    0,
-                    "description",
+                    "projects.description",
+                    -1,
+                    "",
                     e.target.value,
                   )
                 }
@@ -2003,6 +2150,7 @@ export default function Home() {
                             }
                           }}
                           type="file"
+                          accept={ACCEPTED_IMAGE_INPUT}
                           className="  w-full hidden  font-body font-light text-ink/80 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-parchment-300 file:text-ink-soft hover:file:bg-ink-mute"
                         />
                         <svg
@@ -2047,7 +2195,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2068,7 +2216,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2090,7 +2238,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2117,7 +2265,7 @@ export default function Home() {
                           }
                           classNames={{
                             inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                              "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                           }}
                           endContent={
                             <Kbd
@@ -2196,7 +2344,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2217,7 +2365,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2249,7 +2397,9 @@ export default function Home() {
             id="hackathon"
             className="flex flex-col pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">Hackathons</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Hackathons
+            </h2>
             <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
               <p className="pt-0.5">Hackathon Description</p>
               <Textarea
@@ -2258,9 +2408,9 @@ export default function Home() {
                 value={user.hackathons.description}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleInputChange(
-                    "hackathons",
-                    0,
-                    "description",
+                    "hackathons.description",
+                    -1,
+                    "",
                     e.target.value,
                   )
                 }
@@ -2281,7 +2431,11 @@ export default function Home() {
                   <div className="w-full flex justify-end">
                     <button
                       onClick={() =>
-                        deleteItemByIndex("hackathons.hackathons", index, setUser)
+                        deleteItemByIndex(
+                          "hackathons.hackathons",
+                          index,
+                          setUser,
+                        )
                       }
                       aria-label={`Delete hackathon ${index}`}
                     >
@@ -2342,6 +2496,7 @@ export default function Home() {
                             }
                           }}
                           type="file"
+                          accept={ACCEPTED_IMAGE_INPUT}
                           className="  w-full hidden  font-body font-light text-ink/80 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-parchment-300 file:text-ink-soft hover:file:bg-ink-mute"
                         />
                         <svg
@@ -2368,6 +2523,7 @@ export default function Home() {
                           "Click to upload "}{" "}
                         <input
                           type="file"
+                          accept={ACCEPTED_IMAGE_INPUT}
                           className="w-full hidden font-body font-light text-ink/80 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-parchment-300 file:text-ink-soft hover:file:bg-ink-mute"
                         />
                       </label>
@@ -2390,7 +2546,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2411,7 +2567,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2432,7 +2588,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2454,7 +2610,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2475,7 +2631,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2508,7 +2664,9 @@ export default function Home() {
             id="awards"
             className="flex flex-col pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">Awards</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Awards
+            </h2>
             {user.awards &&
               user.awards.length > 0 &&
               user.awards.map((award, index) => (
@@ -2556,7 +2714,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2577,7 +2735,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2598,7 +2756,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2618,7 +2776,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2795,7 +2953,9 @@ export default function Home() {
             id="skills"
             className="flex flex-col pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">Skills</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Skills
+            </h2>
             {user.skills &&
               user.skills.length > 0 &&
               user.skills.map((skill, index) => (
@@ -2843,7 +3003,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -2868,7 +3028,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3065,7 +3225,9 @@ export default function Home() {
             id="languages"
             className="flex flex-col pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">Languages</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Languages
+            </h2>
             {user.languages &&
               user.languages.length > 0 &&
               user.languages.map((language, index) => (
@@ -3113,7 +3275,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3134,7 +3296,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3167,7 +3329,9 @@ export default function Home() {
             id="volunteer"
             className="flex flex-col pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">Volunteer Work</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Volunteer Work
+            </h2>
             {user.volunteer &&
               user.volunteer.length > 0 &&
               user.volunteer.map((work, index) => (
@@ -3215,7 +3379,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3236,7 +3400,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3257,7 +3421,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3278,7 +3442,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3298,7 +3462,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3331,7 +3495,9 @@ export default function Home() {
             id="interests"
             className="flex flex-col pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">Interests</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Interests
+            </h2>
             {user.interests &&
               user.interests.length > 0 &&
               user.interests.map((interest, index) => (
@@ -3379,7 +3545,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3400,7 +3566,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3433,7 +3599,9 @@ export default function Home() {
             id="references"
             className="flex flex-col pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">References</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              References
+            </h2>
             {user.references &&
               user.references.length > 0 &&
               user.references.map((reference, index) => (
@@ -3481,7 +3649,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3501,7 +3669,7 @@ export default function Home() {
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                       }}
                     />
                   </div>
@@ -3533,7 +3701,9 @@ export default function Home() {
             id="social-links"
             className="flex flex-col pb-6 pt-11 justify-center items-start gap-4"
           >
-            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">Social Links</h2>
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Social Links
+            </h2>
             <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
               <p className="pt-0.5">LinkedIn</p>
               <Input

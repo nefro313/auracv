@@ -4,6 +4,7 @@ export const reservedWords = [
   "auth",
   "profile",
   "home",
+  "studio",
   "login",
   "signup",
   "logout",

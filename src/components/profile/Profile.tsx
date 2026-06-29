@@ -165,7 +165,7 @@ export default function Profile() {
             )}
           </div>
 
-          <Link href="/home" className="shrink-0">
+          <Link href="/studio" className="shrink-0">
             <span className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-parchment-50 transition duration-300 hover:shadow-[0_0_28px_-6px_rgba(139,92,246,0.65)]">
               <PencilIcon />
               Edit portfolio

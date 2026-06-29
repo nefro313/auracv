@@ -15,7 +15,6 @@ import {
 import { headers } from "next/headers";
 import { Providers } from "./providers";
 import { CommonContextProvider } from "@/Common_context";
-import { Toaster } from "@/components/ui/toaster";
 import { redirect } from "next/navigation";
 import { supabase } from "@/utils/supabase/supabase_service";
 import { UserProfile } from "@/lib/type";
@@ -300,7 +299,6 @@ export default function RootLayout({
               <Providers>
                 {children} <Analytics />
               </Providers>
-              <Toaster />
             </TooltipProvider>
           </ThemeProvider>
         </CommonContextProvider>
