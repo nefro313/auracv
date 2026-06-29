@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { UserProfile } from "@/lib/type";
 import { AwardCard } from "@/components/award-card";
 import PillNav from "@/components/ui/pill-nav";
+import { Reveal } from "@/components/ui/reveal";
 
 const socialMediaImages: { [key: string]: string } = {
   GitHub: "/icon/github.png",
@@ -61,12 +62,105 @@ export default function page({
   const hasEducation =
     user.education.length > 0 && user.education[0].institution !== "";
 
+  const stripUrl = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "");
+
+  /* Every way to reach out — built from whatever contact data exists. */
+  const connectChannels = [
+    user.basics.email && {
+      label: "Email",
+      value: user.basics.email,
+      href: `mailto:${user.basics.email}`,
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.6}
+          stroke="currentColor"
+          className="size-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+          />
+        </svg>
+      ),
+    },
+    user.basics.phone && {
+      label: "Phone",
+      value: user.basics.phone,
+      href: `tel:${user.basics.phone}`,
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.6}
+          stroke="currentColor"
+          className="size-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
+          />
+        </svg>
+      ),
+    },
+    user.basics.website && {
+      label: "Website",
+      value: stripUrl(user.basics.website),
+      href: user.basics.website,
+      external: true,
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.6}
+          stroke="currentColor"
+          className="size-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
+          />
+        </svg>
+      ),
+    },
+    ...user.basics.profiles
+      .filter((profile) => profile.url)
+      .map((profile) => ({
+        label: profile.network,
+        value: profile.username || stripUrl(profile.url),
+        href: profile.url,
+        external: true,
+        icon: (
+          <img
+            src={socialMediaImages[profile.network] || socialMediaImages.default}
+            alt=""
+            className="size-5 object-contain"
+          />
+        ),
+      })),
+  ].filter(Boolean) as {
+    label: string;
+    value: string;
+    href: string;
+    external?: boolean;
+    icon: React.ReactNode;
+  }[];
+
   const navLinks = [
     { href: "#about", label: "About" },
     hasWork && { href: "#work", label: "Experience" },
     hasProjects && { href: "#projects", label: "Work" },
     hasEducation && { href: "#education", label: "Education" },
-    { href: "#contact", label: "Contact" },
+    connectChannels.length > 0
+      ? { href: "#connect", label: "Connect" }
+      : { href: "#contact", label: "Contact" },
   ].filter(Boolean) as { href: string; label: string }[];
 
   return (
@@ -258,20 +352,23 @@ export default function page({
         {/* ---------------- Experience ---------------- */}
         {hasWork && (
           <section id="work" className="mt-20 scroll-mt-24">
-            <SectionHeading label="Experience" />
+            <Reveal>
+              <SectionHeading label="Experience" />
+            </Reveal>
             <div className="space-y-4">
-              {user.work.map((work) => (
-                <ResumeCard
-                  key={work.name}
-                  logoUrl={work.logo}
-                  altText={work.name}
-                  title={work.name}
-                  subtitle={work.position}
-                  period={`${work.startDate} - ${work.endDate ?? "Present"}`}
-                  description={work.summary}
-                  href={work.website}
-                  tags={work.highlights}
-                />
+              {user.work.map((work, index) => (
+                <Reveal key={work.name} delay={index * 70}>
+                  <ResumeCard
+                    logoUrl={work.logo}
+                    altText={work.name}
+                    title={work.name}
+                    subtitle={work.position}
+                    period={`${work.startDate} - ${work.endDate ?? "Present"}`}
+                    description={work.summary}
+                    href={work.website}
+                    highlights={work.highlights}
+                  />
+                </Reveal>
               ))}
             </div>
           </section>
@@ -280,18 +377,17 @@ export default function page({
         {/* ---------------- Projects ---------------- */}
         {hasProjects && (
           <section id="projects" className="mt-20 scroll-mt-24">
-            <SectionHeading label="Selected work">
-              {user.projects.description !== ""
-                ? user.projects.description
-                : "A few projects I'm proud of — from quick experiments to things people actually use."}
-            </SectionHeading>
-            {/* Lead project runs full width; the rest fall into a two-up grid. */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <Reveal>
+              <SectionHeading label="Selected work">
+                {user.projects.description !== ""
+                  ? user.projects.description
+                  : "A few projects I'm proud of — from quick experiments to things people actually use."}
+              </SectionHeading>
+            </Reveal>
+            {/* Each project gets its own full-width row. */}
+            <div className="space-y-5">
               {user.projects.projects.map((project, index) => (
-                <div
-                  key={project.title}
-                  className={index === 0 ? "sm:col-span-2" : ""}
-                >
+                <Reveal key={project.title} delay={index * 70}>
                   <ProjectCard
                     title={project.title}
                     description={project.description}
@@ -302,7 +398,7 @@ export default function page({
                     website={project.website}
                     source={project.source}
                   />
-                </div>
+                </Reveal>
               ))}
             </div>
           </section>
@@ -312,43 +408,50 @@ export default function page({
         {user.hackathons.hackathons.length > 0 &&
           user.hackathons.hackathons[0].title !== "" && (
             <section id="hackathons" className="mt-20 scroll-mt-24">
-              <SectionHeading label="Hackathons">
-                {user.hackathons.description !== ""
-                  ? user.hackathons.description
-                  : `${user.hackathons.hackathons.length}+ weekends spent building incredible things with motivated people.`}
-              </SectionHeading>
-              <ul className="ml-4 divide-y divide-dashed divide-ink/10 border-l border-ink/10">
-                {user.hackathons.hackathons.map((hackathon, id) => (
-                  <HackathonCard
-                    key={id}
-                    title={hackathon.title}
-                    description={hackathon.description}
-                    location={hackathon.location}
-                    win={hackathon.win}
-                    dates={hackathon.dates}
-                    image={hackathon.image}
-                    url={hackathon.url}
-                  />
-                ))}
-              </ul>
+              <Reveal>
+                <SectionHeading label="Hackathons">
+                  {user.hackathons.description !== ""
+                    ? user.hackathons.description
+                    : `${user.hackathons.hackathons.length}+ weekends spent building incredible things with motivated people.`}
+                </SectionHeading>
+              </Reveal>
+              <Reveal delay={70}>
+                <ul className="ml-4 divide-y divide-dashed divide-ink/10 border-l border-ink/10">
+                  {user.hackathons.hackathons.map((hackathon, id) => (
+                    <HackathonCard
+                      key={id}
+                      title={hackathon.title}
+                      description={hackathon.description}
+                      location={hackathon.location}
+                      win={hackathon.win}
+                      dates={hackathon.dates}
+                      image={hackathon.image}
+                      url={hackathon.url}
+                    />
+                  ))}
+                </ul>
+              </Reveal>
             </section>
           )}
 
         {/* ---------------- Awards ---------------- */}
         {user.awards && user.awards.length > 0 && user.awards[0].title !== "" && (
           <section id="awards" className="mt-20 scroll-mt-24">
-            <SectionHeading label="Awards & certifications">
-              Recognitions and credentials earned along the way.
-            </SectionHeading>
+            <Reveal>
+              <SectionHeading label="Awards & certifications">
+                Recognitions and credentials earned along the way.
+              </SectionHeading>
+            </Reveal>
             <div className="grid grid-cols-1 gap-4">
               {user.awards.map((award, index) => (
-                <AwardCard
-                  key={index}
-                  title={award.title}
-                  date={award.date}
-                  issuer={award.awarder}
-                  description={award.summary}
-                />
+                <Reveal key={index} delay={index * 70}>
+                  <AwardCard
+                    title={award.title}
+                    date={award.date}
+                    issuer={award.awarder}
+                    description={award.summary}
+                  />
+                </Reveal>
               ))}
             </div>
           </section>
@@ -357,18 +460,72 @@ export default function page({
         {/* ---------------- Education ---------------- */}
         {hasEducation && (
           <section id="education" className="mt-20 scroll-mt-24">
-            <SectionHeading label="Education" />
+            <Reveal>
+              <SectionHeading label="Education" />
+            </Reveal>
             <div className="space-y-4">
-              {user.education.map((education) => (
-                <EducationCard
-                  key={education.institution}
-                  href={education.url}
-                  logoUrl={education.logo}
-                  altText={education.institution}
-                  title={education.institution}
-                  period={`${education.startDate} - ${education.endDate}`}
-                  subtitle={education.area}
-                />
+              {user.education.map((education, index) => (
+                <Reveal key={education.institution} delay={index * 70}>
+                  <EducationCard
+                    href={education.url}
+                    logoUrl={education.logo}
+                    altText={education.institution}
+                    title={education.institution}
+                    period={`${education.startDate} - ${education.endDate}`}
+                    subtitle={education.area}
+                  />
+                </Reveal>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ---------------- Connect ---------------- */}
+        {connectChannels.length > 0 && (
+          <section id="connect" className="mt-20 scroll-mt-24">
+            <Reveal>
+              <SectionHeading label="Connect Me">
+                The best ways to reach me — pick whichever suits you. I usually
+                reply within a day.
+              </SectionHeading>
+            </Reveal>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {connectChannels.map((channel, index) => (
+                <Reveal key={`${channel.label}-${index}`} delay={index * 70}>
+                  <Link
+                    href={channel.href}
+                    target={channel.external ? "_blank" : undefined}
+                    rel={channel.external ? "noopener noreferrer" : undefined}
+                    className="glass-card group flex items-center gap-4 rounded-2xl p-4 transition duration-300 hover:-translate-y-1 hover:bg-white/80"
+                  >
+                    <span className="glass-tile flex size-11 shrink-0 items-center justify-center rounded-xl text-ink">
+                      {channel.icon}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-xs font-semibold uppercase tracking-wide text-ink-mute">
+                        {channel.label}
+                      </span>
+                      <span className="block truncate text-sm font-semibold text-ink">
+                        {channel.value}
+                      </span>
+                    </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.8}
+                      stroke="currentColor"
+                      className="size-4 shrink-0 text-ink-mute transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-ink"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.5 19.5 19.5 4.5m0 0H8.25m11.25 0v11.25"
+                      />
+                    </svg>
+                  </Link>
+                </Reveal>
               ))}
             </div>
           </section>
@@ -376,6 +533,7 @@ export default function page({
 
         {/* ---------------- Contact ---------------- */}
         <section id="contact" className="mt-24 scroll-mt-24">
+          <Reveal>
           <div className="relative overflow-hidden rounded-[2rem] bg-ink px-7 py-16 text-center sm:px-12">
             <div
               aria-hidden
@@ -453,6 +611,7 @@ export default function page({
               )}
             </div>
           </div>
+          </Reveal>
         </section>
       </main>
 
