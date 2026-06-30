@@ -147,6 +147,7 @@ export type Education = {
   startDate: string;
   area: string;
   studyType: string;
+  summary: string;
   institution: string;
   url: string;
   logo: string;

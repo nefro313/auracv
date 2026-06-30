@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Markdown from "react-markdown";
 import { ProjectDetail } from "@/lib/type";
+import { externalHref } from "@/lib/utils";
 
 export function ProjectCard({
   title,
@@ -88,7 +89,7 @@ export function ProjectCard({
         <div className="mt-auto flex flex-row flex-wrap items-center gap-2 pt-4">
           {website && (
             <Link
-              href={website}
+              href={externalHref(website)}
               target="_blank"
               className="glass-chip flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-ink-soft transition hover:text-ink"
             >
@@ -111,7 +112,7 @@ export function ProjectCard({
           )}
           {source && (
             <Link
-              href={source}
+              href={externalHref(source)}
               target="_blank"
               className="glass-chip flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-ink-soft transition hover:text-ink"
             >

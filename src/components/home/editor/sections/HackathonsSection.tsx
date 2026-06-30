@@ -6,6 +6,7 @@ import { ACCEPTED_IMAGE_INPUT } from "../constants";
 import { MonthRangePicker, splitRange, joinRange } from "../DatePicker";
 import { useEditor } from "../EditorContext";
 import RemoveButton from "../RemoveButton";
+import RemovePhotoButton from "../RemovePhotoButton";
 
 export default function HackathonsSection() {
   const {
@@ -14,6 +15,7 @@ export default function HackathonsSection() {
     uploadStatus,
     handleInputChange,
     handleFileUpload,
+    handleRemovePhoto,
     deleteItemByIndex,
     addHackathons,
   } = useEditor();
@@ -66,11 +68,19 @@ export default function HackathonsSection() {
                     <p className="pt-0.5">Hackathon logo</p>
                     <div className="flex max-w-xs w-full justify-start gap-2 items-center flex-row flex-wrap">
                       {hackathon.image ? (
-                        <img
-                          src={hackathon.image}
-                          alt="Company Logo"
-                          className="w-12 h-12 sm:h-12 sm:w-12 rounded-xl object-cover"
-                        />
+                        <div className="relative h-12 w-12 group/photo">
+                          <img
+                            src={hackathon.image}
+                            alt="Company Logo"
+                            className="w-12 h-12 sm:h-12 sm:w-12 rounded-xl object-cover"
+                          />
+                          <RemovePhotoButton
+                            onClick={() =>
+                              handleRemovePhoto("hackathonLogo", index)
+                            }
+                            label="Remove hackathon logo"
+                          />
+                        </div>
                       ) : (
                         <div className="w-12 h-12 flex items-center justify-center bg-parchment-200 rounded-xl">
                           <svg

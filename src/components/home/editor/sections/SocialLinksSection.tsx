@@ -154,6 +154,33 @@ export default function SocialLinksSection() {
                 }}
               />
             </div>
+            <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
+              <p className="pt-0.5">Medium</p>
+              <Input
+                type="text"
+                variant="bordered"
+                value={
+                  user.basics.profiles.find(
+                    (profile) => profile.network === "Medium",
+                  )?.url || ""
+                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleSocialProfileChange("Medium", e.target.value, setUser)
+                }
+                className="max-w-xs text-ink-soft"
+                startContent={
+                  <img
+                    src="/icon/medium.svg"
+                    className="w-5 h-5 opacity-70"
+                    alt="Medium"
+                  />
+                }
+                classNames={{
+                  inputWrapper:
+                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                }}
+              />
+            </div>
           </div>
   );
 }

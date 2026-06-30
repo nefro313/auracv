@@ -32,7 +32,7 @@ import { StudioSkeleton } from "@/components/ui/skeletons";
 import Temp1 from "@/components/design/temp_1";
 import { useRouter } from "next/navigation";
 import { initialUserState } from "@/lib/utils";
-import ResumeTemplate from "../ResumeTemplate";
+import ResumeTemplate from "@/components/design/resume_template";
 import { validateImageFile } from "./editor/constants";
 import {
   EditorContextValue,
@@ -349,22 +349,71 @@ export default function Home() {
     }
   };
 
-  const handleRemoveProfilePhoto = () => {
+  // Clear a previously uploaded photo/logo for any section — mirrors the
+  // shape-specific writes in handleFileUpload, but resets the URL to "".
+  const handleRemovePhoto = (type: PhotoTypes, index: number) => {
     markAsEdited();
-    setUser((prevUser) => ({
-      ...prevUser,
-      basics: { ...prevUser.basics, avatarUrl: "" },
-      meta: { ...prevUser.meta, avatarUrl: "" },
-    }));
-    setUserMetaData((prevUserMetaData: UserMetaData) => ({
-      ...prevUserMetaData,
-      avatarUrl: "",
-    }));
+    switch (type) {
+      case "profilePhoto":
+        setUser((prevUser) => ({
+          ...prevUser,
+          basics: { ...prevUser.basics, avatarUrl: "" },
+          meta: { ...prevUser.meta, avatarUrl: "" },
+        }));
+        setUserMetaData((prevUserMetaData: UserMetaData) => ({
+          ...prevUserMetaData,
+          avatarUrl: "",
+        }));
+        break;
+      case "workExperienceLogo":
+        setUser((prevUser) => ({
+          ...prevUser,
+          work: prevUser.work.map((exp, idx) =>
+            idx === index ? { ...exp, logo: "" } : exp,
+          ),
+        }));
+        break;
+      case "educationLogo":
+        setUser((prevUser) => ({
+          ...prevUser,
+          education: prevUser.education.map((edu, idx) =>
+            idx === index ? { ...edu, logo: "" } : edu,
+          ),
+        }));
+        break;
+      case "projectImage":
+        setUser((prevUser) => ({
+          ...prevUser,
+          projects: {
+            ...prevUser.projects,
+            projects: prevUser.projects.projects.map((proj, idx) =>
+              idx === index ? { ...proj, image: "" } : proj,
+            ),
+          },
+        }));
+        break;
+      case "hackathonLogo":
+        setUser((prevUser) => ({
+          ...prevUser,
+          hackathons: {
+            ...prevUser.hackathons,
+            hackathons: prevUser.hackathons.hackathons.map((hack, idx) =>
+              idx === index ? { ...hack, image: "" } : hack,
+            ),
+          },
+        }));
+        break;
+      default:
+        break;
+    }
+
     setUploadStatus((prevStatus) => ({
       ...prevStatus,
-      "profilePhoto-0": "idle",
+      [`${type}-${index}`]: "idle",
     }));
   };
+
+  const handleRemoveProfilePhoto = () => handleRemovePhoto("profilePhoto", 0);
 
   const handleSkillClose = (skillName: string, skillToRemove: string) => {
     markAsEdited();
@@ -485,6 +534,70 @@ export default function Home() {
       });
       setInputValueProject("");
     }
+  };
+
+  // Bullet highlights — an editable string[] on each work / project entry.
+  // Immutable updates (mirrors the technologies handlers) so React re-renders.
+  type HighlightPath = "work" | "projects.projects";
+  const updateHighlights = (
+    prev: UserProfile,
+    path: HighlightPath,
+    itemIndex: number,
+    next: (highlights: string[]) => string[],
+  ): UserProfile => {
+    if (path === "work") {
+      const work = [...prev.work];
+      work[itemIndex] = {
+        ...work[itemIndex],
+        highlights: next(work[itemIndex].highlights ?? []),
+      };
+      return { ...prev, work };
+    }
+    const projects = [...prev.projects.projects];
+    projects[itemIndex] = {
+      ...projects[itemIndex],
+      highlights: next(projects[itemIndex].highlights ?? []),
+    };
+    return { ...prev, projects: { ...prev.projects, projects } };
+  };
+
+  const handleHighlightChange = (
+    path: HighlightPath,
+    itemIndex: number,
+    highlightIndex: number,
+    value: string,
+  ) => {
+    setUser((prev) =>
+      updateHighlights(prev, path, itemIndex, (highlights) => {
+        const next = [...highlights];
+        next[highlightIndex] = value;
+        return next;
+      }),
+    );
+    markAsEdited();
+  };
+
+  const addHighlight = (path: HighlightPath, itemIndex: number) => {
+    setUser((prev) =>
+      updateHighlights(prev, path, itemIndex, (highlights) => [
+        ...highlights,
+        "",
+      ]),
+    );
+    markAsEdited();
+  };
+
+  const removeHighlight = (
+    path: HighlightPath,
+    itemIndex: number,
+    highlightIndex: number,
+  ) => {
+    setUser((prev) =>
+      updateHighlights(prev, path, itemIndex, (highlights) =>
+        highlights.filter((_, i) => i !== highlightIndex),
+      ),
+    );
+    markAsEdited();
   };
 
   const [file, setFile] = useState<File | null>(null);
@@ -622,6 +735,7 @@ export default function Home() {
         startDate: "",
         area: "",
         studyType: "",
+        summary: "",
         institution: "",
         url: "",
         logo: "",
@@ -1035,6 +1149,7 @@ export default function Home() {
     handleInputChange,
     handleFileUpload,
     handleRemoveProfilePhoto,
+    handleRemovePhoto,
     deleteItemByIndex,
     markAsEdited,
     handleSkillClose,
@@ -1042,6 +1157,9 @@ export default function Home() {
     handleSkillInputKeyDown,
     handleTechnologyClose,
     handleTechnologyInputKeyDown,
+    handleHighlightChange,
+    addHighlight,
+    removeHighlight,
     handleSocialProfileChange,
     addWork,
     addEducation,
@@ -1624,7 +1742,7 @@ export default function Home() {
             <Temp1 user={user} preview />
           </Tab>
           <Tab key="template2" className="p-0" title="Resume">
-            <ResumeTemplate profile={user} />
+            <ResumeTemplate profile={user} preview />
           </Tab>
         </Tabs>
 

@@ -66,6 +66,7 @@ class Education(_Schema):
     startDate: str = ""
     area: str = ""
     studyType: str = ""
+    summary: str = ""
     institution: str = ""
     url: str = ""
     logo: str = ""

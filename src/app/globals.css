@@ -27,15 +27,18 @@
   .glass-card {
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.62),
-      rgba(255, 255, 255, 0.34)
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0.26)
     );
-    backdrop-filter: blur(18px) saturate(150%);
-    -webkit-backdrop-filter: blur(18px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    /* Soft ink hairline instead of a bright white rim so the card sits flush
+       with the parchment rather than reading as a raised glass edge. */
+    border: 1px solid rgba(33, 27, 18, 0.06);
+    /* Grounded, low shadow — enough to separate from the page, not float above it. */
     box-shadow:
-      0 16px 44px -20px rgba(33, 27, 18, 0.32),
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
+      0 2px 6px -4px rgba(33, 27, 18, 0.12),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.55);
   }
 
   /* Gradient monogram / logo tile — a modern stand-in for a missing logo. */
@@ -56,10 +59,13 @@
 
   /* Frosted pill — tech tags, dates, small chips. */
   .glass-chip {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.55);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    /* Visible ink hairline + faint lift so chips and the small Website/Source
+       buttons read as distinct pills instead of vanishing into the card. */
+    border: 1px solid rgba(33, 27, 18, 0.1);
+    box-shadow: 0 1px 2px -1px rgba(33, 27, 18, 0.12);
   }
 }
 
@@ -199,3 +205,22 @@
 .react-calendar-heatmap .color-scale-2 { fill: #8cc665; }
 .react-calendar-heatmap .color-scale-3 { fill: #44a340; }
 .react-calendar-heatmap .color-scale-4 { fill: #1e6823; }
+
+/* ---- Print: clean, multi-page PDF export of the resume --------------- */
+@media print {
+  @page {
+    /* Even margins on every page; paper size follows the user's choice
+       (A4/Letter) to avoid scaling surprises. break-inside-avoid on each
+       resume entry keeps records from splitting across the page boundary. */
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+  }
+  /* Keep accent links and the hairline section rules in the printed PDF. */
+  #resume-template {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

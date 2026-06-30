@@ -12,6 +12,7 @@ interface ResumeCardProps {
   badges?: readonly string[];
   period: string;
   description?: string;
+  summary?: string;
 }
 
 export const EducationCard = ({
@@ -22,6 +23,7 @@ export const EducationCard = ({
   href,
   badges,
   period,
+  summary,
 }: ResumeCardProps) => {
   return (
     <Link href={href || "#"} className="group block">
@@ -60,6 +62,12 @@ export const EducationCard = ({
           {subtitle && (
             <p className="mt-1 text-sm font-semibold text-ink-soft">
               {subtitle}
+            </p>
+          )}
+
+          {summary && (
+            <p className="mt-1.5 text-[0.85rem]/relaxed font-medium text-ink-mute">
+              {summary}
             </p>
           )}
         </div>

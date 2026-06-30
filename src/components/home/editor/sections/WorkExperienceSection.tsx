@@ -5,7 +5,9 @@ import React from "react";
 import { ACCEPTED_IMAGE_INPUT } from "../constants";
 import { MonthRangePicker } from "../DatePicker";
 import { useEditor } from "../EditorContext";
+import HighlightsField from "../HighlightsField";
 import RemoveButton from "../RemoveButton";
+import RemovePhotoButton from "../RemovePhotoButton";
 
 export default function WorkExperienceSection() {
   const {
@@ -14,6 +16,7 @@ export default function WorkExperienceSection() {
     uploadStatus,
     handleInputChange,
     handleFileUpload,
+    handleRemovePhoto,
     deleteItemByIndex,
     addWork,
   } = useEditor();
@@ -44,11 +47,19 @@ export default function WorkExperienceSection() {
               <p className="pt-0.05">Company Logo</p>
               <div className="flex max-w-xs w-full justify-start gap-2 items-center flex-row flex-wrap">
                 {experience.logo ? (
-                  <img
-                    src={experience.logo}
-                    alt="Company Logo"
-                    className="w-12 h-12 sm:h-12 sm:w-12 rounded-xl object-cover"
-                  />
+                  <div className="relative h-12 w-12 group/photo">
+                    <img
+                      src={experience.logo}
+                      alt="Company Logo"
+                      className="w-12 h-12 sm:h-12 sm:w-12 rounded-xl object-cover"
+                    />
+                    <RemovePhotoButton
+                      onClick={() =>
+                        handleRemovePhoto("workExperienceLogo", index)
+                      }
+                      label="Remove company logo"
+                    />
+                  </div>
                 ) : (
                   <div className="w-12 h-12 flex items-center justify-center bg-parchment-200 rounded-xl">
                     <svg
@@ -189,6 +200,11 @@ export default function WorkExperienceSection() {
                 }
               />
             </div>
+            <HighlightsField
+              path="work"
+              index={index}
+              highlights={experience.highlights ?? []}
+            />
           </div>
         ))}
       <Button

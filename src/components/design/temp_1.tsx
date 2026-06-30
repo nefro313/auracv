@@ -6,7 +6,7 @@ import { EducationCard } from "@/components/education-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { tailwindColors } from "@/lib/utils";
+import { tailwindColors, externalHref } from "@/lib/utils";
 import { UserProfile } from "@/lib/type";
 import { AwardCard } from "@/components/award-card";
 import PillNav from "@/components/ui/pill-nav";
@@ -17,6 +17,7 @@ const socialMediaImages: { [key: string]: string } = {
   LinkedIn: "/icon/linkedin.png",
   X: "/icon/twitter.png",
   Youtube: "/icon/youtube.png",
+  Medium: "/icon/medium.svg",
   dribbble: "/icon/dribbble.png",
   default: "/icon/dribbble.png",
 };
@@ -144,7 +145,7 @@ export default function Page({
     user.basics.website && {
       label: "Website",
       value: stripUrl(user.basics.website),
-      href: user.basics.website,
+      href: externalHref(user.basics.website),
       external: true,
       icon: (
         <svg
@@ -168,7 +169,7 @@ export default function Page({
       .map((profile) => ({
         label: profile.network,
         value: profile.username || stripUrl(profile.url),
-        href: profile.url,
+        href: externalHref(profile.url),
         external: true,
         icon: (
           <img
@@ -417,7 +418,7 @@ export default function Page({
                     subtitle={work.position}
                     period={`${work.startDate} - ${work.endDate ?? "Present"}`}
                     description={work.summary}
-                    href={work.website}
+                    href={externalHref(work.website)}
                     highlights={work.highlights}
                   />
                 </Reveal>
@@ -519,12 +520,13 @@ export default function Page({
               {user.education.map((education, index) => (
                 <Reveal key={education.institution} delay={index * 70}>
                   <EducationCard
-                    href={education.url}
+                    href={externalHref(education.url)}
                     logoUrl={education.logo}
                     altText={education.institution}
                     title={education.institution}
                     period={`${education.startDate} - ${education.endDate}`}
                     subtitle={education.area}
+                    summary={education.summary}
                   />
                 </Reveal>
               ))}
@@ -644,7 +646,7 @@ export default function Page({
                 (profile) =>
                   profile.url && (
                     <Link
-                      href={profile.url}
+                      href={externalHref(profile.url)}
                       target="_blank"
                       aria-label={profile.network}
                       key={profile.network}
@@ -746,7 +748,7 @@ export default function Page({
                   profile.url && (
                     <Link
                       key={profile.network}
-                      href={profile.url}
+                      href={externalHref(profile.url)}
                       target="_blank"
                       aria-label={profile.network}
                       className="flex size-9 items-center justify-center rounded-full border border-ink/10 bg-white transition hover:-translate-y-0.5 hover:border-ink/25"

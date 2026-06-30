@@ -54,6 +54,7 @@ export interface EditorContextValue {
     index: number,
   ) => Promise<void>;
   handleRemoveProfilePhoto: () => void;
+  handleRemovePhoto: (type: PhotoTypes, index: number) => void;
   deleteItemByIndex: (path: string, index: number, setState: SetUser) => void;
   markAsEdited: () => void;
 
@@ -71,6 +72,20 @@ export interface EditorContextValue {
     event: KeyboardEvent<HTMLInputElement>,
     index: number,
     inputValue: string,
+  ) => void;
+
+  // Bullet highlights (work entries & projects share this string[] editor)
+  handleHighlightChange: (
+    path: "work" | "projects.projects",
+    itemIndex: number,
+    highlightIndex: number,
+    value: string,
+  ) => void;
+  addHighlight: (path: "work" | "projects.projects", itemIndex: number) => void;
+  removeHighlight: (
+    path: "work" | "projects.projects",
+    itemIndex: number,
+    highlightIndex: number,
   ) => void;
 
   // Social profiles

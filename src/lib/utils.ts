@@ -6,6 +6,21 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Normalize a user-entered link to an absolute URL so it opens the real site.
+ * A bare domain like "linkedin.com" is otherwise treated as a relative path and
+ * resolves to "<our-domain>/linkedin.com". Internal paths ("/resume"),
+ * mailto:/tel:, and links that already carry a protocol are left untouched.
+ * Empty input returns "" so existing `href || "#"` fallbacks still apply.
+ */
+export function externalHref(url?: string | null): string {
+  const trimmed = (url ?? "").trim();
+  if (!trimmed) return "";
+  if (/^(https?:\/\/|mailto:|tel:|\/)/i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("//")) return `https:${trimmed}`;
+  return `https://${trimmed}`;
+}
+
 export const tailwindColors = [
   { name: "red", value: "#ef4444" },
   { name: "green", value: "#10b981" },
@@ -98,6 +113,11 @@ export const initialUserState: UserProfile =
         url: "",
         network: "Dribbble",
       },
+      {
+        username: "",
+        url: "",
+        network: "Medium",
+      },
     ],
   },
   certificates: [
@@ -114,6 +134,7 @@ export const initialUserState: UserProfile =
       startDate: "",
       area: "",
       studyType: "",
+      summary: "",
       institution: "",
       url: "",
       logo: "",

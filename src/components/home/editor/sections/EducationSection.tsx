@@ -1,11 +1,12 @@
 "use client";
 
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input, Textarea } from "@nextui-org/react";
 import React from "react";
 import { ACCEPTED_IMAGE_INPUT } from "../constants";
 import { MonthRangePicker } from "../DatePicker";
 import { useEditor } from "../EditorContext";
 import RemoveButton from "../RemoveButton";
+import RemovePhotoButton from "../RemovePhotoButton";
 
 export default function EducationSection() {
   const {
@@ -14,6 +15,7 @@ export default function EducationSection() {
     uploadStatus,
     handleInputChange,
     handleFileUpload,
+    handleRemovePhoto,
     deleteItemByIndex,
     addEducation,
   } = useEditor();
@@ -42,11 +44,19 @@ export default function EducationSection() {
                     <p className="pt-.05">College Logo</p>
                     <div className="flex max-w-xs w-full justify-start gap-2 items-center flex-row flex-wrap">
                       {edu.logo ? (
-                        <img
-                          src={edu.logo}
-                          alt="College Logo"
-                          className="w-12 h-12 sm:h-12 sm:w-12 rounded-xl object-cover"
-                        />
+                        <div className="relative h-12 w-12 group/photo">
+                          <img
+                            src={edu.logo}
+                            alt="College Logo"
+                            className="w-12 h-12 sm:h-12 sm:w-12 rounded-xl object-cover"
+                          />
+                          <RemovePhotoButton
+                            onClick={() =>
+                              handleRemovePhoto("educationLogo", index)
+                            }
+                            label="Remove college logo"
+                          />
+                        </div>
                       ) : (
                         <div className="w-12 h-12 flex items-center justify-center bg-parchment-200 rounded-xl">
                           <svg
@@ -167,6 +177,28 @@ export default function EducationSection() {
                         }}
                       />
                     </div>
+                  </div>
+                  <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
+                    <p className="pt-.05">Summary</p>
+                    <Textarea
+                      variant="bordered"
+                      labelPlacement="outside"
+                      placeholder="Coursework focus, achievements, activities…"
+                      value={edu.summary ?? ""}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleInputChange(
+                          "education",
+                          index,
+                          "summary",
+                          e.target.value,
+                        )
+                      }
+                      className="max-w-xs text-ink-soft"
+                      classNames={{
+                        inputWrapper:
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                      }}
+                    />
                   </div>
                 </div>
               ))}

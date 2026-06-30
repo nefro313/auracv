@@ -274,6 +274,11 @@ function Page() {
               url: "",
               network: "Dribbble",
             },
+            {
+              username: "",
+              url: "",
+              network: "Medium",
+            },
           ],
         },
         certificates: [
@@ -290,6 +295,7 @@ function Page() {
             startDate: "",
             area: "",
             studyType: "",
+            summary: "",
             institution: "",
             url: "",
             logo: "",

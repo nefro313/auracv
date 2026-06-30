@@ -5,7 +5,9 @@ import React, { KeyboardEvent } from "react";
 import { ACCEPTED_IMAGE_INPUT } from "../constants";
 import { MonthRangePicker, splitRange, joinRange } from "../DatePicker";
 import { useEditor } from "../EditorContext";
+import HighlightsField from "../HighlightsField";
 import RemoveButton from "../RemoveButton";
+import RemovePhotoButton from "../RemovePhotoButton";
 
 export default function ProjectsSection() {
   const {
@@ -16,6 +18,7 @@ export default function ProjectsSection() {
     setInputValueProject,
     handleInputChange,
     handleFileUpload,
+    handleRemovePhoto,
     deleteItemByIndex,
     handleTechnologyClose,
     handleTechnologyInputKeyDown,
@@ -68,11 +71,19 @@ export default function ProjectsSection() {
                     <p className="pt-0.05">Project Image</p>
                     <div className="flex max-w-xs w-full justify-start gap-2 items-center flex-row flex-wrap">
                       {project.image ? (
-                        <img
-                          src={project.image}
-                          alt="Project Image"
-                          className="w-12 h-12 sm:h-12 sm:w-12 rounded-xl object-cover"
-                        />
+                        <div className="relative h-12 w-12 group/photo">
+                          <img
+                            src={project.image}
+                            alt="Project Image"
+                            className="w-12 h-12 sm:h-12 sm:w-12 rounded-xl object-cover"
+                          />
+                          <RemovePhotoButton
+                            onClick={() =>
+                              handleRemovePhoto("projectImage", index)
+                            }
+                            label="Remove project image"
+                          />
+                        </div>
                       ) : (
                         <div className="w-12 h-12 flex items-center justify-center bg-parchment-200 rounded-xl">
                           <svg
@@ -320,6 +331,11 @@ export default function ProjectsSection() {
                       }}
                     />
                   </div>
+                  <HighlightsField
+                    path="projects.projects"
+                    index={index}
+                    highlights={project.highlights ?? []}
+                  />
                 </div>
               ))}
             <Button
