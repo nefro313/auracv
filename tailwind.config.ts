@@ -21,12 +21,8 @@ const config = {
     },
     extend: {
       fontFamily: {
-        urbanist: ["var(--font-urbanist)", "sans-serif"],
         outfit: ["var(--font-outfit)", "sans-serif"],
-        monrope: ["var(--font-monrope)", "sans-serif"],
         dmSans: ["var(--font-dm-sans)", "sans-serif"],
-        sora: ["var(--font-sora)", "sans-serif"],
-        roboto: ["var(--font-roboto)", "sans-serif"],
         quattrocento: ["var(--font-quattrocento)", "serif"],
         fraunces: ["var(--font-fraunces)", "Georgia", "serif"],
       },

@@ -2,7 +2,7 @@
 import { getCookie } from "cookies-next/client";
 import DotPattern from "@/components/magicui/dot-pattern";
 import React, { useRef, useState, useEffect } from "react";
-import { avatar, Input, user } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import type { ConfettiRef } from "@/components/magicui/confetti";
 import { supabase } from "@/utils/supabase/client";
 import { setCookie } from "cookies-next/client";
@@ -17,14 +17,6 @@ import AnimatedCircularProgressBar from "@/components/magicui/animated-circular-
 import withAuth from "@/utils/authProtect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNotifications } from "@/components/ui/notification";
-import { link } from "fs";
-interface User {
-  userId: string;
-  email: string;
-  avatarUrl: string;
-  userName?: string; // Make userName optional
-  fullName: string;
-}
 
 /** Turn an axios/unknown error into a user-facing message, preferring the
  *  backend's `{ error: { message } }` envelope and handling network/timeouts. */

@@ -1,9 +1,7 @@
 import GithubCard2 from "@/components/github_wrap/github-card";
 
 import Hero from "@/components/landingpage/Hero";
-import Temp_1 from "@/components/design/temp_1";
 import { headers } from "next/headers";
-import { UserProfile } from "@/lib/type";
 import GithubCard from "@/components/github_wrap_portfolio/github-card";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;

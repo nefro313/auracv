@@ -46,7 +46,7 @@ function SectionHeading({
   );
 }
 
-export default function page({
+export default function Page({
   user,
   preview = false,
 }: {
