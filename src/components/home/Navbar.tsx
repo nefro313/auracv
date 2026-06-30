@@ -8,6 +8,7 @@ import { AuraLogo } from "@/components/brand/logo";
 import { Button, Snippet } from "@nextui-org/react";
 import { CommonContext } from "@/Common_context";
 import { supabase } from "@/utils/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Navbar() {
   const { logout, userData } = useContext(CommonContext);
@@ -45,18 +46,22 @@ export default function Navbar() {
               </Link>
             </div>
             <nav className=" sm:flex gap-3">
-              <Snippet
-                variant="bordered"
-                classNames={{
-                  base: "rounded-full border border-ink/15 bg-white/60 py-[.23rem] text-ink",
-                  pre: "font-outfit font-semibold text-ink-soft",
-                  symbol: "hidden",
-                  copyButton: "text-ink-mute",
-                }}
-                className="hidden font-outfit sm:flex"
-              >
-                {`${user}.auracv.me`}
-              </Snippet>{" "}
+              {user ? (
+                <Snippet
+                  variant="bordered"
+                  classNames={{
+                    base: "rounded-full border border-ink/15 bg-white/60 py-[.23rem] text-ink",
+                    pre: "font-outfit font-semibold text-ink-soft",
+                    symbol: "hidden",
+                    copyButton: "text-ink-mute",
+                  }}
+                  className="hidden font-outfit sm:flex"
+                >
+                  {`${user}.auracv.me`}
+                </Snippet>
+              ) : (
+                <Skeleton className="hidden h-9 w-44 rounded-full sm:block" />
+              )}{" "}
               <Button
                 onPress={() => logout()}
                 variant="bordered"

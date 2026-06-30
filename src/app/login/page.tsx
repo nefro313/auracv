@@ -11,6 +11,10 @@ export default function Page() {
   const router = useRouter();
   const { userData } = useCommonContext();
   if (userData) {
+    // Already signed in — greet them on the way to the studio.
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("auracv:welcome", "1");
+    }
     router.push("/studio");
   }
   const SigninWithGoogle = async () => {

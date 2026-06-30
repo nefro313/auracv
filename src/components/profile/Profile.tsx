@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Spinner } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { useCommonContext } from "@/Common_context";
 import { supabase } from "@/utils/supabase/client";
 import { UserProfile } from "@/lib/type";
+import { profileCompleteness, skillCount } from "@/lib/utils";
+import { ProfileSkeleton } from "@/components/ui/skeletons";
 
 type Row = {
   userName: string;
@@ -74,29 +75,16 @@ export default function Profile() {
     return [
       { label: "Experience", value: r?.work?.length ?? 0 },
       { label: "Projects", value: r?.projects?.projects?.length ?? 0 },
-      { label: "Skills", value: r?.basics?.skills?.length ?? 0 },
+      { label: "Skills", value: skillCount(r) },
       { label: "Education", value: r?.education?.length ?? 0 },
     ];
   }, [row]);
 
   // Portfolio completeness — a friendly "how filled-out is this" signal.
-  const completeness = useMemo(() => {
-    const r = row?.resumeJson;
-    if (!r) return 0;
-    const checks = [
-      Boolean(r.basics?.name),
-      Boolean(r.basics?.about),
-      Boolean(avatar),
-      Boolean(r.basics?.skills?.length),
-      Boolean(r.work?.length),
-      Boolean(r.projects?.projects?.length),
-      Boolean(r.education?.length),
-      Boolean(r.basics?.profiles?.length),
-    ];
-    return Math.round(
-      (checks.filter(Boolean).length / checks.length) * 100,
-    );
-  }, [row, avatar]);
+  const completeness = useMemo(
+    () => profileCompleteness(row?.resumeJson, avatar),
+    [row, avatar],
+  );
 
   const memberSince = userData?.user?.created_at
     ? new Date(userData.user.created_at).toLocaleDateString("en-US", {
@@ -106,11 +94,7 @@ export default function Profile() {
     : "—";
 
   if (loading) {
-    return (
-      <div className="flex h-[60vh] w-full items-center justify-center">
-        <Spinner color="secondary" label="Loading your profile…" />
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   return (

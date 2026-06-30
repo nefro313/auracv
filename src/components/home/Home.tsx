@@ -5,7 +5,6 @@ import {
   Radio,
   RadioGroup,
   Snippet,
-  Spinner,
   Tabs,
   Tab,
 } from "@nextui-org/react";
@@ -29,6 +28,7 @@ import { supabase } from "@/utils/supabase/client";
 import { useCommonContext } from "@/Common_context";
 import imageCompression from "browser-image-compression";
 import { useNotifications } from "@/components/ui/notification";
+import { StudioSkeleton } from "@/components/ui/skeletons";
 import Temp1 from "@/components/design/temp_1";
 import { useRouter } from "next/navigation";
 import { initialUserState } from "@/lib/utils";
@@ -93,7 +93,7 @@ export default function Home() {
     useState<IndexedUploadStatus>(initialUploadStatus);
   const [user, setUser] = useState<UserProfile>(initialUserState);
   const [initialUser, setInitialUser] = useState<UserProfile>(initialUserState);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false); // Track unsaved changes
   const [slugError, setSlugError] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
@@ -950,11 +950,7 @@ export default function Home() {
   };
 
   if (isLoading) {
-    return (
-      <div className="w-full h-screen flex justify-center items-center">
-        <Spinner color="default" />
-      </div>
-    );
+    return <StudioSkeleton />;
   }
 
   const sections = [

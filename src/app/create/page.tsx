@@ -125,6 +125,8 @@ function Page() {
         return;
       }
       if (data.length > 0) {
+        // Returning user with a portfolio — greet them while /studio loads.
+        sessionStorage.setItem("auracv:welcome", "1");
         router.push("/studio");
         return;
       }

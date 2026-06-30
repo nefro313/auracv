@@ -215,3 +215,50 @@ export const initialUserState: UserProfile =
     },
   ],
 };
+
+/**
+ * Portfolio "completeness" — a friendly 0–100 signal for how filled-out a
+ * profile is. Shared by the Profile page and the post-login Welcome screen so
+ * both always show the same number. `avatarUrl` lets callers fold in an avatar
+ * that lives outside resumeJson (e.g. the OAuth session photo).
+ */
+export function profileCompleteness(
+  profile?: UserProfile | null,
+  avatarUrl?: string,
+): number {
+  if (!profile) return 0;
+
+  const b = profile.basics;
+  const hasText = (v?: string) => Boolean(v && v.trim());
+
+  // Count a section "done" only when it has real content — array length alone
+  // is misleading because new profiles seed empty placeholder rows (e.g. five
+  // blank social links, a blank work/education/project row), which would
+  // otherwise read as 100% complete on a near-empty profile.
+  const checks = [
+    hasText(b?.name),
+    hasText(b?.about),
+    hasText(avatarUrl) || hasText(b?.avatarUrl),
+    skillCount(profile) > 0,
+    (profile.work ?? []).some((w) => hasText(w?.name) || hasText(w?.position)),
+    (profile.projects?.projects ?? []).some(
+      (p) => hasText(p?.title) || hasText(p?.description),
+    ),
+    (profile.education ?? []).some(
+      (e) => hasText(e?.institution) || hasText(e?.area),
+    ),
+    (b?.profiles ?? []).some((p) => hasText(p?.url)),
+  ];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+/**
+ * A friendly "how many skills" count, taken from the General Info tag list
+ * (`basics.skills`). Empty tags are ignored, so a profile with none reads as 0.
+ */
+export function skillCount(profile?: UserProfile | null): number {
+  if (!profile) return 0;
+  return (profile.basics?.skills ?? []).filter(
+    (s) => typeof s === "string" && s.trim(),
+  ).length;
+}
