@@ -7,7 +7,9 @@ import {
   Snippet,
   Tabs,
   Tab,
+  Tooltip,
 } from "@nextui-org/react";
+import { Undo2, Redo2 } from "lucide-react";
 import React, {
   ChangeEvent,
   KeyboardEvent,
@@ -34,6 +36,7 @@ import { useRouter } from "next/navigation";
 import { initialUserState } from "@/lib/utils";
 import ResumeTemplate from "@/components/design/resume_template";
 import { validateImageFile } from "./editor/constants";
+import { useUndoableState } from "./editor/useUndoableState";
 import {
   EditorContextValue,
   EditorProvider,
@@ -91,7 +94,15 @@ export default function Home() {
   const [demo, setDemo] = useState(false);
   const [uploadStatus, setUploadStatus] =
     useState<IndexedUploadStatus>(initialUploadStatus);
-  const [user, setUser] = useState<UserProfile>(initialUserState);
+  const {
+    state: user,
+    setState: setUser,
+    reset: resetUserHistory,
+    undo: undoUser,
+    redo: redoUser,
+    canUndo,
+    canRedo,
+  } = useUndoableState<UserProfile>(initialUserState);
   const [initialUser, setInitialUser] = useState<UserProfile>(initialUserState);
   const [isLoading, setIsLoading] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false); // Track unsaved changes
@@ -120,7 +131,8 @@ export default function Home() {
         if (data && data.length > 0) {
           setUserMetaData(data[0].metaJson);
           setGithubData(data[0].githubWrap);
-          setUser(JSON.parse(JSON.stringify(data[0].resumeJson))); // Deep clone
+          // Loaded profile is the history baseline — no undo into empty state.
+          resetUserHistory(JSON.parse(JSON.stringify(data[0].resumeJson)));
           setInitialUser(JSON.parse(JSON.stringify(data[0].resumeJson))); // Deep clone
           setIsLoading(false);
         }
@@ -145,6 +157,35 @@ export default function Home() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [hasUnsavedChanges]);
+
+  // Undo / redo for the whole editor. Both keep the doc marked as unsaved.
+  const handleUndo = useCallback(() => {
+    undoUser();
+    setHasUnsavedChanges(true);
+  }, [undoUser]);
+
+  const handleRedo = useCallback(() => {
+    redoUser();
+    setHasUnsavedChanges(true);
+  }, [redoUser]);
+
+  // Keyboard: Cmd/Ctrl+Z to undo, Cmd/Ctrl+Shift+Z or Ctrl+Y to redo.
+  useEffect(() => {
+    if (isLoading) return;
+    const onKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey)) return;
+      const key = e.key.toLowerCase();
+      if (key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else if ((key === "z" && e.shiftKey) || key === "y") {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isLoading, handleUndo, handleRedo]);
 
   const markAsEdited = () => {
     setHasUnsavedChanges(true);
@@ -649,16 +690,18 @@ export default function Home() {
     setFile(acceptedFiles[0]);
   }, []);
 
-  console.log(selectedSection);
-
   useEffect(() => {
+    // The editor form (and its section anchors) only mount once the profile has
+    // loaded. Skip until then so the scroll-spy attaches to real nodes instead
+    // of warning about ids that don't exist yet.
+    if (isLoading) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (manualScroll.current) return;
 
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            console.log("Intersecting:", entry.target.id); // Debugging
             setSelectedSection(entry.target.id);
           }
         });
@@ -673,9 +716,6 @@ export default function Home() {
       "project",
       "hackathon",
       "awards",
-
-      // "certificates",
-      // "publications",
       "skills",
       "interests",
       "references",
@@ -686,22 +726,11 @@ export default function Home() {
 
     sectionIds.forEach((id) => {
       const section = document.getElementById(id);
-      if (section) {
-        observer.observe(section);
-      } else {
-        console.warn(`Section with id ${id} not found`); // Debugging
-      }
+      if (section) observer.observe(section);
     });
 
-    return () => {
-      sectionIds.forEach((id) => {
-        const section = document.getElementById(id);
-        if (section) {
-          observer.unobserve(section);
-        }
-      });
-    };
-  }, []);
+    return () => observer.disconnect();
+  }, [isLoading]);
 
   const handleRadioChange = (event: any) => {
     const value = event.target.value;
@@ -976,7 +1005,8 @@ export default function Home() {
         });
       } else {
         setHasUnsavedChanges(false);
-        setUser(repairedUser);
+        // Saved state becomes the new history baseline.
+        resetUserHistory(repairedUser);
         setInitialUser(JSON.parse(JSON.stringify(repairedUser)));
         notify({
           variant: "success",
@@ -1208,6 +1238,28 @@ export default function Home() {
       >
         <div className="flex w-full justify-center items-center p-6 border-b border-ink/10 bg-parchment-50/80 backdrop-blur-sm sticky top-0 z-30">
           <div className="flex gap-2 w-full">
+            <Tooltip content="Undo (⌘Z)" delay={400} closeDelay={0}>
+              <Button
+                isIconOnly
+                aria-label="Undo"
+                onPress={handleUndo}
+                isDisabled={!canUndo}
+                className="shrink-0 rounded-full border border-ink/15 bg-white text-ink-soft data-[hover=true]:text-ink data-[hover=true]:border-ink/25"
+              >
+                <Undo2 className="size-4" />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Redo (⌘⇧Z)" delay={400} closeDelay={0}>
+              <Button
+                isIconOnly
+                aria-label="Redo"
+                onPress={handleRedo}
+                isDisabled={!canRedo}
+                className="shrink-0 rounded-full border border-ink/15 bg-white text-ink-soft data-[hover=true]:text-ink data-[hover=true]:border-ink/25"
+              >
+                <Redo2 className="size-4" />
+              </Button>
+            </Tooltip>
             <Link
               target="_blank"
               className="flex-1 bg-white text-ink-soft font-semibold px-4 py-2.5 text-sm justify-center items-center flex rounded-full cursor-pointer hover:border-ink/25 hover:text-ink transition-colors duration-200 border border-ink/15 text-center"
