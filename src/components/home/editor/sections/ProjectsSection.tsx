@@ -2,6 +2,7 @@
 
 import { Button, Chip, Input, Kbd, Textarea } from "@nextui-org/react";
 import React, { KeyboardEvent } from "react";
+import { externalHref } from "@/lib/utils";
 import { ACCEPTED_IMAGE_INPUT } from "../constants";
 import { MonthRangePicker, splitRange, joinRange } from "../DatePicker";
 import { useEditor } from "../EditorContext";
@@ -303,6 +304,15 @@ export default function ProjectsSection() {
                           e.target.value,
                         )
                       }
+                      onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                        handleInputChange(
+                          "projects.projects",
+                          index,
+                          "website",
+                          externalHref(e.target.value),
+                        )
+                      }
+                      placeholder="https://example.com"
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:
@@ -324,6 +334,15 @@ export default function ProjectsSection() {
                           e.target.value,
                         )
                       }
+                      onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                        handleInputChange(
+                          "projects.projects",
+                          index,
+                          "source",
+                          externalHref(e.target.value),
+                        )
+                      }
+                      placeholder="https://github.com/username/repo"
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:

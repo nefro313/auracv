@@ -2,6 +2,7 @@
 
 import { Input } from "@nextui-org/react";
 import React from "react";
+import { externalHref } from "@/lib/utils";
 import { useEditor } from "../EditorContext";
 
 export default function SocialLinksSection() {
@@ -32,6 +33,14 @@ export default function SocialLinksSection() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleSocialProfileChange("LinkedIn", e.target.value, setUser)
                 }
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                  handleSocialProfileChange(
+                    "LinkedIn",
+                    externalHref(e.target.value),
+                    setUser,
+                  )
+                }
+                placeholder="https://linkedin.com/in/username"
                 className="max-w-xs text-ink-soft"
                 startContent={
                   <img
@@ -59,6 +68,14 @@ export default function SocialLinksSection() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleSocialProfileChange("GitHub", e.target.value, setUser)
                 }
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                  handleSocialProfileChange(
+                    "GitHub",
+                    externalHref(e.target.value),
+                    setUser,
+                  )
+                }
+                placeholder="https://github.com/username"
                 className="max-w-xs text-ink-soft"
                 startContent={
                   <img
@@ -86,6 +103,14 @@ export default function SocialLinksSection() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleSocialProfileChange("X", e.target.value, setUser)
                 }
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                  handleSocialProfileChange(
+                    "X",
+                    externalHref(e.target.value),
+                    setUser,
+                  )
+                }
+                placeholder="https://x.com/username"
                 className="max-w-xs text-ink-soft"
                 startContent={
                   <img
@@ -113,6 +138,14 @@ export default function SocialLinksSection() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleSocialProfileChange("Youtube", e.target.value, setUser)
                 }
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                  handleSocialProfileChange(
+                    "Youtube",
+                    externalHref(e.target.value),
+                    setUser,
+                  )
+                }
+                placeholder="https://youtube.com/@channel"
                 className="max-w-xs text-ink-soft"
                 startContent={
                   <img
@@ -140,6 +173,14 @@ export default function SocialLinksSection() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleSocialProfileChange("Dribbble", e.target.value, setUser)
                 }
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                  handleSocialProfileChange(
+                    "Dribbble",
+                    externalHref(e.target.value),
+                    setUser,
+                  )
+                }
+                placeholder="https://dribbble.com/username"
                 className="max-w-xs text-ink-soft"
                 startContent={
                   <img
@@ -167,6 +208,14 @@ export default function SocialLinksSection() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleSocialProfileChange("Medium", e.target.value, setUser)
                 }
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                  handleSocialProfileChange(
+                    "Medium",
+                    externalHref(e.target.value),
+                    setUser,
+                  )
+                }
+                placeholder="https://medium.com/@username"
                 className="max-w-xs text-ink-soft"
                 startContent={
                   <img

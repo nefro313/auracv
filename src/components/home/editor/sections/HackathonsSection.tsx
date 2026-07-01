@@ -2,6 +2,7 @@
 
 import { Button, Input, Textarea } from "@nextui-org/react";
 import React from "react";
+import { externalHref } from "@/lib/utils";
 import { ACCEPTED_IMAGE_INPUT } from "../constants";
 import { MonthRangePicker, splitRange, joinRange } from "../DatePicker";
 import { useEditor } from "../EditorContext";
@@ -242,6 +243,15 @@ export default function HackathonsSection() {
                           e.target.value,
                         )
                       }
+                      onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                        handleInputChange(
+                          "hackathons.hackathons",
+                          index,
+                          "links.website",
+                          externalHref(e.target.value),
+                        )
+                      }
+                      placeholder="https://devpost.com/software/your-project"
                       className="max-w-xs text-ink-soft"
                       classNames={{
                         inputWrapper:

@@ -2,6 +2,7 @@
 
 import { Button, Input, Textarea } from "@nextui-org/react";
 import React from "react";
+import { externalHref } from "@/lib/utils";
 import { ACCEPTED_IMAGE_INPUT } from "../constants";
 import { MonthRangePicker } from "../DatePicker";
 import { useEditor } from "../EditorContext";
@@ -190,6 +191,7 @@ export default function WorkExperienceSection() {
                 type="text"
                 variant="bordered"
                 value={experience.website}
+                placeholder="https://company.com"
                 className="max-w-xs text-ink-soft"
                 classNames={{
                   inputWrapper:
@@ -197,6 +199,14 @@ export default function WorkExperienceSection() {
                 }}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleInputChange("work", index, "website", e.target.value)
+                }
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                  handleInputChange(
+                    "work",
+                    index,
+                    "website",
+                    externalHref(e.target.value),
+                  )
                 }
               />
             </div>
