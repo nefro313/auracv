@@ -6,7 +6,7 @@ import Left_panel from "./Left_panel";
 export default function Webview() {
   return (
     <div>
-      <section className="hidden h-screen flex-col overflow-hidden bg-parchment-100 font-outfit text-ink sm:flex">
+      <section className="hidden h-screen flex-col overflow-hidden bg-parchment-100 font-outfit text-ink lg:flex">
         <Navbar />
 
         <div className="grid min-h-0 flex-1 grid-cols-12">

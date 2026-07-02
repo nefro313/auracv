@@ -368,7 +368,7 @@ export default function GeneralInfoSection() {
                   placeholder="Country Code"
                   className="w-32 text-ink-soft"
                   classNames={{
-                    inputWrapper: "border-1 shadow-none h-[40px]",
+                    inputWrapper: "border-1 shadow-none h-11",
                   }}
                 />
               </div>

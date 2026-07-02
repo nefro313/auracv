@@ -139,7 +139,7 @@ function Page() {
   }, [userData]);
   if (loading) {
     return (
-      <div className="flex h-screen w-full flex-col items-center bg-parchment-100 px-7">
+      <div className="flex min-h-screen w-full flex-col items-center bg-parchment-100 px-7">
         <div className="mt-28 flex w-full max-w-sm flex-col items-center gap-8">
           {/* heading */}
           <Skeleton className="h-9 w-64" />
@@ -537,12 +537,12 @@ function Page() {
   };
 
   return (
-    <div className="flex h-screen w-full flex-col bg-parchment-100 font-outfit text-ink antialiased">
+    <div className="flex min-h-screen w-full flex-col bg-parchment-100 font-outfit text-ink antialiased">
       {notificationViewport}
       <div>
         <Navbar />
       </div>
-      <div className="w-full h-full px-7 flex flex-col justify-between items-center ">
+      <div className="w-full flex-1 px-7 flex flex-col justify-between items-center py-10">
         {aiCreating ? (
           <div className="flex mt-44 justify-start flex-col items-center gap-10">
             <DotPattern className="absolute mt-16 [mask-image:radial-gradient(300px_circle_at_center,white,transparent)]" />
@@ -568,7 +568,7 @@ function Page() {
               placeholder=""
               labelPlacement="outside"
               label="Claim your portfolio domain"
-              className="z-50 inputbar col-span-1 flex w-full max-w-sm justify-center rounded-xl font-outfit text-lg font-semibold text-ink-soft min-w-lg sm:col-span-2"
+              className="z-50 inputbar flex w-full max-w-sm justify-center rounded-xl font-outfit text-lg font-semibold text-ink-soft"
               size="lg"
               classNames={{
                 input: "font-semibold text-lg",

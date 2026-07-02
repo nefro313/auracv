@@ -368,7 +368,7 @@ const ResumeTemplate: React.FC<ResumeTemplateProps> = ({
 
         <div
           id="resume-template"
-          className="resume-sheet rounded-2xl border border-ink/10 bg-white p-8 leading-relaxed text-ink-soft shadow-[0_24px_60px_-32px_rgba(33,27,18,0.35)] sm:p-12 print:rounded-none print:border-0 print:p-0 print:shadow-none"
+          className="resume-sheet rounded-2xl border border-ink/10 bg-white p-6 leading-relaxed text-ink-soft shadow-[0_24px_60px_-32px_rgba(33,27,18,0.35)] sm:p-10 md:p-12 print:rounded-none print:border-0 print:p-0 print:shadow-none"
         >
           <header className="mb-6 break-inside-avoid text-center">
             <h1 className="font-fraunces text-4xl font-medium tracking-tight text-ink">

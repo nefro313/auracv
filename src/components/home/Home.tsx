@@ -1207,104 +1207,108 @@ export default function Home() {
     <EditorProvider value={editorValue}>
       <div className="grid grid-cols-5 font-outfit w-full h-full overflow-hidden bg-parchment-100 text-ink">
         {notificationViewport}
-      <div className="col-span-1 hidden sm:block border-r border-ink/10 h-full overflow-y-auto px-8 py-12">
-        <div>
-          <p className="mb-6 pl-1 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-ink-mute">
-            Sections
-          </p>
-          <RadioGroup
-            color="secondary"
-            className="font-medium text-ink-mute"
-            defaultValue="general-info"
-            value={selectedSection}
-            onChange={handleRadioChange}
-          >
-            {sections.map((section, index) => (
-              <RadioLink
-                key={`radio-${index}`}
-                id={section.id}
-                label={section.label}
-                isLast={index === sections.length - 1}
-              />
-            ))}
-          </RadioGroup>
-        </div>
-      </div>
-      <div
-        ref={formScrollRef}
-        className={`col-span-5 sm:col-span-2 sm:block border-r border-ink/10 h-full overflow-y-auto bg-parchment-50 ${
-          demo ? "hidden" : "block"
-        }`}
-      >
-        <div className="flex w-full justify-center items-center p-6 border-b border-ink/10 bg-parchment-50/80 backdrop-blur-sm sticky top-0 z-30">
-          <div className="flex gap-2 w-full">
-            <Tooltip content="Undo (⌘Z)" delay={400} closeDelay={0}>
-              <Button
-                isIconOnly
-                aria-label="Undo"
-                onPress={handleUndo}
-                isDisabled={!canUndo}
-                className="shrink-0 rounded-full border border-ink/15 bg-white text-ink-soft data-[hover=true]:text-ink data-[hover=true]:border-ink/25"
-              >
-                <Undo2 className="size-4" />
-              </Button>
-            </Tooltip>
-            <Tooltip content="Redo (⌘⇧Z)" delay={400} closeDelay={0}>
-              <Button
-                isIconOnly
-                aria-label="Redo"
-                onPress={handleRedo}
-                isDisabled={!canRedo}
-                className="shrink-0 rounded-full border border-ink/15 bg-white text-ink-soft data-[hover=true]:text-ink data-[hover=true]:border-ink/25"
-              >
-                <Redo2 className="size-4" />
-              </Button>
-            </Tooltip>
-            <Link
-              target="_blank"
-              className="flex-1 bg-white text-ink-soft font-semibold px-4 py-2.5 text-sm justify-center items-center flex rounded-full cursor-pointer hover:border-ink/25 hover:text-ink transition-colors duration-200 border border-ink/15 text-center"
-              href={`https://${user.meta.userName}.auracv.me`}
+        <div className="col-span-1 hidden lg:block border-r border-ink/10 h-full overflow-y-auto px-8 py-12">
+          <div>
+            <p className="mb-6 pl-1 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-ink-mute">
+              Sections
+            </p>
+            <RadioGroup
+              color="secondary"
+              className="font-medium text-ink-mute"
+              defaultValue="general-info"
+              value={selectedSection}
+              onChange={handleRadioChange}
             >
-              View Portfolio
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-4 ml-1"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+              {sections.map((section, index) => (
+                <RadioLink
+                  key={`radio-${index}`}
+                  id={section.id}
+                  label={section.label}
+                  isLast={index === sections.length - 1}
                 />
-              </svg>
-            </Link>
-            <Link
-              target="_blank"
-              className="flex-1 bg-white text-ink-soft font-semibold px-4 py-2.5 text-sm justify-center items-center flex rounded-full cursor-pointer hover:border-ink/25 hover:text-ink transition-colors duration-200 border border-ink/15 text-center"
-              href={`https://${user.meta.userName}.auracv.me/resume`}
-            >
-              View Resume
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-4 ml-1"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
-                />
-              </svg>
-            </Link>
+              ))}
+            </RadioGroup>
           </div>
         </div>
-        {/* <div className="flex flex-col bg-parchment-100 gap-4 p-4 sm:p-6 border-b">
+        <div
+          ref={formScrollRef}
+          className={`col-span-5 lg:col-span-2 lg:block border-r border-ink/10 h-full overflow-y-auto bg-parchment-50 ${
+            demo ? "hidden" : "block"
+          }`}
+        >
+          <div className="flex w-full justify-center items-center p-6 border-b border-ink/10 bg-parchment-50/80 backdrop-blur-sm sticky top-0 z-30">
+            <div className="flex flex-col gap-2 w-full lg:flex-row lg:items-center">
+              <div className="hidden lg:flex gap-2 shrink-0">
+                <Tooltip content="Undo (⌘Z)" delay={400} closeDelay={0}>
+                  <Button
+                    isIconOnly
+                    aria-label="Undo"
+                    onPress={handleUndo}
+                    isDisabled={!canUndo}
+                    className="h-11 w-11 min-w-11 shrink-0 rounded-full border border-ink/15 bg-white text-ink-soft data-[hover=true]:text-ink data-[hover=true]:border-ink/25"
+                  >
+                    <Undo2 className="size-4" />
+                  </Button>
+                </Tooltip>
+                <Tooltip content="Redo (⌘⇧Z)" delay={400} closeDelay={0}>
+                  <Button
+                    isIconOnly
+                    aria-label="Redo"
+                    onPress={handleRedo}
+                    isDisabled={!canRedo}
+                    className="h-11 w-11 min-w-11 shrink-0 rounded-full border border-ink/15 bg-white text-ink-soft data-[hover=true]:text-ink data-[hover=true]:border-ink/25"
+                  >
+                    <Redo2 className="size-4" />
+                  </Button>
+                </Tooltip>
+              </div>
+              <div className="flex gap-2 w-full lg:flex-1">
+                <Link
+                  target="_blank"
+                  className="flex-1 bg-white text-ink-soft font-semibold px-4 py-2.5 text-sm justify-center items-center flex rounded-full cursor-pointer hover:border-ink/25 hover:text-ink transition-colors duration-200 border border-ink/15 text-center"
+                  href={`https://${user.meta.userName}.auracv.me`}
+                >
+                  View Portfolio
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-4 ml-1"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+                    />
+                  </svg>
+                </Link>
+                <Link
+                  target="_blank"
+                  className="flex-1 bg-white text-ink-soft font-semibold px-4 py-2.5 text-sm justify-center items-center flex rounded-full cursor-pointer hover:border-ink/25 hover:text-ink transition-colors duration-200 border border-ink/15 text-center"
+                  href={`https://${user.meta.userName}.auracv.me/resume`}
+                >
+                  View Resume
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-4 ml-1"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+                    />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </div>
+          {/* <div className="flex flex-col bg-parchment-100 gap-4 p-4 sm:p-6 border-b">
           {githubData === null ? (
             <div className="flex flex-col gap-4">
               <h3 className="text-lg sm:text-xl font-bold text-left bg-gradient-to-r from-[#2ea043] to-[#238636] text-transparent bg-clip-text">
@@ -1387,30 +1391,53 @@ export default function Home() {
             </div>
           )}
         </div> */}
-        <div className="py-6 px-6 border-b block sm:hidden">
-          {" "}
-          <Snippet
-            variant="bordered"
-            classNames={{
-              base: "rounded-xl border py-[.23rem] ",
-              pre: "font-dmSans font-medium",
-              symbol: "hidden",
-            }}
-            className="flex font-dmSans  sm:hidden"
-          >
-            {`https://${user.meta.userName}.auracv.me`}
-          </Snippet>
-        </div>
-        <div className="px-8">
-          <GeneralInfoSection />
-          <WorkExperienceSection />
-          <EducationSection />
-          <ProjectsSection />
-          <HackathonsSection />
-          {/* Awards Section */}
-          <AwardsSection />
-          {/* Certificates Section */}
-          {/* <div
+          <div className="py-6 px-6 border-b block lg:hidden">
+            <div className="flex items-center gap-2">
+              <Snippet
+                variant="bordered"
+                classNames={{
+                  base: "min-w-0 flex-1 rounded-xl border py-[.23rem]",
+                  pre: "font-dmSans font-medium truncate",
+                  symbol: "hidden",
+                }}
+                className="flex min-w-0 flex-1 font-dmSans"
+              >
+                {`${user.meta.userName}.auracv.me`}
+              </Snippet>
+              <Tooltip content="Undo (⌘Z)" delay={400} closeDelay={0}>
+                <Button
+                  isIconOnly
+                  aria-label="Undo"
+                  onPress={handleUndo}
+                  isDisabled={!canUndo}
+                  className="h-11 w-11 min-w-11 shrink-0 rounded-full border border-ink/15 bg-white text-ink-soft data-[hover=true]:text-ink data-[hover=true]:border-ink/25"
+                >
+                  <Undo2 className="size-4" />
+                </Button>
+              </Tooltip>
+              <Tooltip content="Redo (⌘⇧Z)" delay={400} closeDelay={0}>
+                <Button
+                  isIconOnly
+                  aria-label="Redo"
+                  onPress={handleRedo}
+                  isDisabled={!canRedo}
+                  className="h-11 w-11 min-w-11 shrink-0 rounded-full border border-ink/15 bg-white text-ink-soft data-[hover=true]:text-ink data-[hover=true]:border-ink/25"
+                >
+                  <Redo2 className="size-4" />
+                </Button>
+              </Tooltip>
+            </div>
+          </div>
+          <div className="px-8">
+            <GeneralInfoSection />
+            <WorkExperienceSection />
+            <EducationSection />
+            <ProjectsSection />
+            <HackathonsSection />
+            {/* Awards Section */}
+            <AwardsSection />
+            {/* Certificates Section */}
+            {/* <div
             id="certificates"
             className="flex flex-col pt-11 justify-center items-start gap-4"
           >
@@ -1553,10 +1580,10 @@ export default function Home() {
               Add Certificate
             </Button>
           </div> */}
-          {/* Skills Section */}
-          <SkillsSection />
-          {/* Publications Section */}
-          {/* <div
+            {/* Skills Section */}
+            <SkillsSection />
+            {/* Publications Section */}
+            {/* <div
             id="publications"
             className="flex flex-col pt-11 justify-center items-start gap-4"
           >
@@ -1719,97 +1746,102 @@ export default function Home() {
               Add Publication
             </Button>
           </div> */}
-          {/* Languages Section */}
-          <LanguagesSection />
-          {/* Volunteer Section */}
-          <VolunteerSection />
-          {/* Interests Section */}
-          <InterestsSection />
-          {/* References Section */}
-          <ReferencesSection />
-          <SocialLinksSection />
-        </div>
-        <div className=" w-full z-50 flex gap-4 bg-parchment-50/85 backdrop-blur-md border-t border-ink/10 p-4 px-10 sticky bottom-0">
-          <Link
-            target="_blank"
-            href={`https://${user.meta.userName}.auracv.me`}
-            className="w-full gap-1 rounded-full sm:flex hidden border border-ink/15 font-semibold text-sm justify-center items-center text-ink-soft hover:text-ink hover:border-ink/25 transition-colors bg-white py-2.5"
-          >
-            View live
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-4 text-ink-soft"
+            {/* Languages Section */}
+            <LanguagesSection />
+            {/* Volunteer Section */}
+            <VolunteerSection />
+            {/* Interests Section */}
+            <InterestsSection />
+            {/* References Section */}
+            <ReferencesSection />
+            <SocialLinksSection />
+          </div>
+          <div className=" w-full z-50 flex gap-4 bg-parchment-50/85 backdrop-blur-md border-t border-ink/10 p-4 px-6 sm:px-10 sticky bottom-0">
+            <Link
+              target="_blank"
+              href={`https://${user.meta.userName}.auracv.me`}
+              className="w-full gap-1 rounded-full lg:flex hidden border border-ink/15 font-semibold text-sm justify-center items-center text-ink-soft hover:text-ink hover:border-ink/25 transition-colors bg-white py-2.5"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
-              />
-            </svg>
-          </Link>
-          <Button
-            onPress={() => setDemo(true)}
-            className="w-full flex sm:hidden rounded-full border border-ink/15 bg-white font-semibold text-sm justify-center items-center text-ink-soft"
-          >
-            See demo{" "}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-4 text-ink-soft"
+              View live
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-4 text-ink-soft"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+                />
+              </svg>
+            </Link>
+            <Button
+              onPress={() => setDemo(true)}
+              className="w-full flex lg:hidden gap-1.5 rounded-full border border-ink/15 bg-white font-semibold text-sm justify-center items-center text-ink-soft"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
-              />
-            </svg>
-          </Button>
-          <Button
-            onPress={handleSaveChanges}
-            className="bg-ink w-full text-parchment-50 text-sm justify-center flex items-center rounded-full font-semibold py-2 px-4 transition-shadow duration-300 hover:shadow-[0_0_28px_-6px_rgba(139,92,246,0.65)]"
-          >
-            Save changes
-          </Button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-4 text-ink-soft"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                />
+              </svg>
+              Preview
+            </Button>
+            <Button
+              onPress={handleSaveChanges}
+              className="bg-ink w-full text-parchment-50 text-sm justify-center flex items-center rounded-full font-semibold py-2 px-4 transition-shadow duration-300 hover:shadow-[0_0_28px_-6px_rgba(139,92,246,0.65)]"
+            >
+              Save changes
+            </Button>
+          </div>
         </div>
-      </div>
-      <div
-        className={`col-span-5  sm:col-span-2 sm:block h-full overflow-y-auto bg-parchment-100 ${
-          demo ? "block" : "hidden"
-        }`}
-      >
-        <Tabs
-          color="secondary"
-          aria-label="Template Options"
-          className="w-full p-6 border-b border-ink/10 bg-parchment-50/80 backdrop-blur-sm sticky top-0 z-30"
-          fullWidth
+        <div
+          className={`col-span-5  lg:col-span-2 lg:block h-full overflow-y-auto bg-parchment-100 ${
+            demo ? "block" : "hidden"
+          }`}
         >
-          <Tab key="template1" className="p-0" title="Portfolio">
-            <Temp1 user={user} preview />
-          </Tab>
-          <Tab key="template2" className="p-0" title="Resume">
-            <ResumeTemplate profile={user} preview />
-          </Tab>
-        </Tabs>
-
-        <div className=" w-full z-50 flex gap-4 sm:hidden bg-parchment-50/85 backdrop-blur-md border-t border-ink/10 p-4 px-10 fixed bottom-0">
-          <Button
-            onPress={() => setDemo(false)}
-            className="w-full flex sm:hidden rounded-full border border-ink/15 bg-white font-semibold text-sm justify-center items-center text-ink-soft"
+          <Tabs
+            color="secondary"
+            aria-label="Template Options"
+            className="w-full p-6 border-b border-ink/10 bg-parchment-50/80 backdrop-blur-sm sticky top-0 z-30"
+            fullWidth
           >
-            Back to Edit
-          </Button>
-          <Button className="bg-ink w-full text-parchment-50 text-sm justify-center flex items-center rounded-full font-semibold py-2 px-4 ">
-            Save changes{" "}
-          </Button>
+            <Tab key="template1" className="p-0" title="Portfolio">
+              <Temp1 user={user} preview />
+            </Tab>
+            <Tab key="template2" className="p-0" title="Resume">
+              <ResumeTemplate profile={user} preview />
+            </Tab>
+          </Tabs>
+
+          <div className=" w-full z-50 flex gap-4 lg:hidden bg-parchment-50/85 backdrop-blur-md border-t border-ink/10 p-4 px-6 sm:px-10 sticky bottom-0">
+            <Button
+              onPress={() => setDemo(false)}
+              className="w-full flex lg:hidden rounded-full border border-ink/15 bg-white font-semibold text-sm justify-center items-center text-ink-soft"
+            >
+              Back to Edit
+            </Button>
+            <Button className="bg-ink w-full text-parchment-50 text-sm justify-center flex items-center rounded-full font-semibold py-2 px-4 ">
+              Save changes{" "}
+            </Button>
+          </div>
         </div>
-      </div>
       </div>
     </EditorProvider>
   );

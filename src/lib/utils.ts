@@ -21,6 +21,24 @@ export function externalHref(url?: string | null): string {
   return `https://${trimmed}`;
 }
 
+/**
+ * Favicon (site icon) for an arbitrary URL via Google's public favicon
+ * service. Lets user-added custom links show the destination site's own icon
+ * without bundling one. Returns "" when the URL can't be parsed so callers can
+ * fall back to a default icon.
+ */
+export function faviconUrl(url?: string | null, size = 64): string {
+  const href = externalHref(url);
+  if (!href) return "";
+  try {
+    const { hostname } = new URL(href);
+    if (!hostname) return "";
+    return `https://www.google.com/s2/favicons?sz=${size}&domain=${hostname}`;
+  } catch {
+    return "";
+  }
+}
+
 export const tailwindColors = [
   { name: "red", value: "#ef4444" },
   { name: "green", value: "#10b981" },

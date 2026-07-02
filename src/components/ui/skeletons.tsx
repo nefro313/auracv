@@ -24,7 +24,7 @@ export function AppShellSkeleton() {
       </header>
 
       <div className="grid grid-cols-12">
-        <aside className="hidden min-h-[calc(100vh-65px)] border-r border-ink/10 sm:col-span-1 sm:block">
+        <aside className="hidden min-h-[calc(100vh-65px)] border-r border-ink/10 lg:col-span-1 lg:block">
           <div className="flex flex-col items-center gap-8 py-9">
             <Skeleton className="h-10 w-10 rounded-full" />
             <Skeleton className="h-10 w-10 rounded-xl" />
@@ -32,7 +32,7 @@ export function AppShellSkeleton() {
           </div>
         </aside>
 
-        <main className="col-span-12 px-6 py-10 sm:col-span-11 sm:px-10">
+        <main className="col-span-12 px-6 py-10 lg:col-span-11 lg:px-10">
           <div className="mx-auto w-full max-w-5xl">
             <Skeleton className="h-10 w-64" />
             <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -60,7 +60,7 @@ export function StudioSkeleton() {
   return (
     <div className="grid h-full min-h-[70vh] w-full grid-cols-5 overflow-hidden bg-parchment-100 font-outfit">
       {/* Sections rail */}
-      <div className="col-span-1 hidden h-full border-r border-ink/10 px-8 py-12 sm:block">
+      <div className="col-span-1 hidden h-full border-r border-ink/10 px-8 py-12 lg:block">
         <Skeleton className="mb-8 h-3 w-20" />
         <div className="flex flex-col gap-6">
           {Array.from({ length: 9 }).map((_, i) => (
@@ -70,7 +70,7 @@ export function StudioSkeleton() {
       </div>
 
       {/* Form column */}
-      <div className="col-span-5 h-full border-r border-ink/10 bg-parchment-50 sm:col-span-2">
+      <div className="col-span-5 h-full border-r border-ink/10 bg-parchment-50 lg:col-span-2">
         <div className="flex gap-2 border-b border-ink/10 p-6">
           <Skeleton className="h-10 flex-1 rounded-full" />
           <Skeleton className="h-10 flex-1 rounded-full" />
@@ -95,7 +95,7 @@ export function StudioSkeleton() {
       </div>
 
       {/* Live preview column */}
-      <div className="col-span-2 hidden h-full bg-parchment-100 sm:block">
+      <div className="col-span-2 hidden h-full bg-parchment-100 lg:block">
         <div className="border-b border-ink/10 p-6">
           <Skeleton className="h-10 w-full rounded-2xl" />
         </div>

@@ -1,7 +1,5 @@
 "use client";
 
-// please add mobile navbar and make it responsive
-
 import React, { useState, useContext, useEffect } from "react";
 import Link from "next/link";
 import { AuraLogo } from "@/components/brand/logo";
@@ -32,7 +30,7 @@ export default function Navbar() {
   }, [userData]);
   return (
     <>
-      <header className="py-4 z-50   bg-white border-b border-neutral-200  top-0">
+      <header className="sticky top-0 z-50 border-b border-ink/10 bg-parchment-50/85 py-4 backdrop-blur-md">
         <div className=" px-4 mx-auto sm:px-8 lg:px-10 ">
           <div className="flex items-center justify-between">
             <div className="flex-shrink-0">
@@ -44,11 +42,11 @@ export default function Navbar() {
                 <AuraLogo markClassName="h-8 w-8" wordClassName="text-xl" />
               </Link>
             </div>
-            <nav className=" sm:flex gap-3">
+            <nav className="flex items-center gap-3">
               <Button
                 onClick={() => logout()}
                 variant="bordered"
-                className="rounded-xl py-1 flex justify-center items-center font-dmSans border font-semibold "
+                className="rounded-full py-1 flex justify-center items-center gap-1 font-outfit border border-ink/15 bg-white/60 font-semibold text-ink-soft transition hover:border-ink/25 hover:text-ink"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -56,7 +54,7 @@ export default function Navbar() {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="size-5 text-gray-700"
+                  className="size-5 text-ink-soft"
                 >
                   <path
                     strokeLinecap="round"

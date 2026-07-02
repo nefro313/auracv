@@ -1,16 +1,66 @@
 "use client";
 
-import { Input } from "@nextui-org/react";
+import { Button, Input } from "@nextui-org/react";
 import React from "react";
-import { externalHref } from "@/lib/utils";
+import { externalHref, faviconUrl } from "@/lib/utils";
 import { useEditor } from "../EditorContext";
 
+const FIXED_NETWORKS = [
+  "LinkedIn",
+  "GitHub",
+  "X",
+  "Youtube",
+  "Dribbble",
+  "Medium",
+];
+
 export default function SocialLinksSection() {
-  const {
-    user,
-    setUser,
-    handleSocialProfileChange,
-  } = useEditor();
+  const { user, setUser, handleSocialProfileChange, markAsEdited } = useEditor();
+
+  // Any profile that isn't one of the built-in networks is a user-added custom
+  // link (articles, case studies, a personal site, …). Keep the original array
+  // index so edits/removes map back to basics.profiles.
+  const customLinks = user.basics.profiles
+    .map((profile, index) => ({ ...profile, index }))
+    .filter((profile) => !FIXED_NETWORKS.includes(profile.network));
+
+  const addCustomLink = () => {
+    setUser((prev) => ({
+      ...prev,
+      basics: {
+        ...prev.basics,
+        profiles: [
+          ...prev.basics.profiles,
+          { network: "", url: "", username: "" },
+        ],
+      },
+    }));
+    markAsEdited();
+  };
+
+  const updateCustomLink = (
+    profileIndex: number,
+    field: "network" | "url",
+    value: string,
+  ) => {
+    setUser((prev) => {
+      const profiles = [...prev.basics.profiles];
+      profiles[profileIndex] = { ...profiles[profileIndex], [field]: value };
+      return { ...prev, basics: { ...prev.basics, profiles } };
+    });
+    markAsEdited();
+  };
+
+  const removeCustomLink = (profileIndex: number) => {
+    setUser((prev) => ({
+      ...prev,
+      basics: {
+        ...prev.basics,
+        profiles: prev.basics.profiles.filter((_, i) => i !== profileIndex),
+      },
+    }));
+    markAsEdited();
+  };
 
   return (
           <div
@@ -229,6 +279,131 @@ export default function SocialLinksSection() {
                     "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
                 }}
               />
+            </div>
+            <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
+              <p className="pt-0.5">Other Links</p>
+              <div className="flex max-w-xs w-full flex-col gap-3">
+                {customLinks.length === 0 && (
+                  <p className="text-xs text-ink-mute">
+                    Articles, case studies, your own site — add any link. The
+                    site&rsquo;s icon is fetched automatically.
+                  </p>
+                )}
+                {customLinks.map((link) => (
+                  <div
+                    key={`custom-${link.index}`}
+                    className="flex w-full items-start gap-2"
+                  >
+                    <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                      <Input
+                        size="sm"
+                        type="text"
+                        variant="bordered"
+                        placeholder="Label (e.g. Articles)"
+                        value={link.network}
+                        onChange={(e) =>
+                          updateCustomLink(link.index, "network", e.target.value)
+                        }
+                        classNames={{
+                          inputWrapper:
+                            "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                        }}
+                      />
+                      <Input
+                        size="sm"
+                        type="text"
+                        variant="bordered"
+                        placeholder="https://yoursite.com/article"
+                        value={link.url}
+                        onChange={(e) =>
+                          updateCustomLink(link.index, "url", e.target.value)
+                        }
+                        onBlur={(e) =>
+                          updateCustomLink(
+                            link.index,
+                            "url",
+                            externalHref(e.target.value),
+                          )
+                        }
+                        startContent={
+                          faviconUrl(link.url) ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={faviconUrl(link.url)}
+                              alt=""
+                              className="h-4 w-4 shrink-0 rounded-sm object-contain"
+                            />
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1.5}
+                              stroke="currentColor"
+                              className="h-4 w-4 shrink-0 text-ink-mute"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0a8.949 8.949 0 0 0 4.951-1.488A3.987 3.987 0 0 0 13 16h-2a3.987 3.987 0 0 0-3.951 3.512A8.949 8.949 0 0 0 12 21Zm3-11.25a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                              />
+                            </svg>
+                          )
+                        }
+                        classNames={{
+                          inputWrapper:
+                            "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                        }}
+                      />
+                    </div>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="bordered"
+                      aria-label="Remove link"
+                      onPress={() => removeCustomLink(link.index)}
+                      className="h-11 w-11 min-w-11 shrink-0 rounded-full border-ink/15"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="h-5 w-5 text-ink-soft"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 12h14"
+                        />
+                      </svg>
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  size="sm"
+                  variant="bordered"
+                  onPress={addCustomLink}
+                  className="group self-end border border-dashed border-ink/25 bg-none rounded-full flex justify-center items-center gap-1 text-xs font-semibold text-ink-soft transition-colors hover:border-aura-violet/60 hover:bg-aura-violet/5 hover:text-ink"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-4 text-ink-soft transition-transform duration-200 ease-out group-hover:rotate-90"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4.5v15m7.5-7.5h-15"
+                    />
+                  </svg>
+                  Add link
+                </Button>
+              </div>
             </div>
           </div>
   );

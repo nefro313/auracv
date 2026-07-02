@@ -20,6 +20,18 @@ const config = {
       },
     },
     extend: {
+      // Custom breakpoints layered on top of Tailwind's defaults (sm 640 /
+      // md 768 / lg 1024 / xl 1280 / 2xl 1536) so the five target device tiers
+      // each get a prefix, without shifting any existing responsive class:
+      //   base   320–480   small phones
+      //   xs:    481–767   large phones
+      //   md:    768–1024  tablets
+      //   lg:    1025–1440 laptops / desktops
+      //   wide:  1441+     large monitors
+      screens: {
+        xs: "481px",
+        wide: "1441px",
+      },
       fontFamily: {
         outfit: ["var(--font-outfit)", "sans-serif"],
         dmSans: ["var(--font-dm-sans)", "sans-serif"],

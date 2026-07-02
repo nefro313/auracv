@@ -31,56 +31,52 @@ export default function HighlightsField({
         )}
 
         {highlights.map((highlight, highlightIndex) => (
-          <div
+          <Textarea
             key={`highlight-${highlightIndex}`}
-            className="flex w-full items-start gap-2"
-          >
-            <Textarea
-              minRows={1}
-              variant="bordered"
-              placeholder="Add a highlight"
-              value={highlight}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleHighlightChange(
-                  path,
-                  index,
-                  highlightIndex,
-                  e.target.value,
-                )
-              }
-              className="flex-1 text-ink-soft"
-              classNames={{
-                inputWrapper:
-                  "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
-              }}
-            />
-            <Button
-              isIconOnly
-              size="sm"
-              variant="bordered"
-              aria-label={`Remove highlight ${highlightIndex + 1}`}
-              onPress={() => removeHighlight(path, index, highlightIndex)}
-              className="min-w-[40px] h-[40px] p-0 rounded-full border-ink/15"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5 text-ink-soft"
+            minRows={1}
+            variant="bordered"
+            placeholder="Add a highlight"
+            value={highlight}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              handleHighlightChange(path, index, highlightIndex, e.target.value)
+            }
+            className="w-full text-ink-soft"
+            classNames={{
+              input: "pr-6",
+              inputWrapper:
+                "items-start border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+            }}
+            endContent={
+              <button
+                type="button"
+                aria-label={`Remove highlight ${highlightIndex + 1}`}
+                onClick={() => removeHighlight(path, index, highlightIndex)}
+                className="-mr-1 mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full text-ink-mute transition-colors hover:bg-red-50 hover:text-red-500"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
-              </svg>
-            </Button>
-          </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="size-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18 18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            }
+          />
         ))}
 
         <Button
           size="sm"
           variant="bordered"
           onPress={() => addHighlight(path, index)}
-          className="group self-start border border-dashed border-ink/25 bg-none rounded-full flex justify-center items-center gap-1 text-xs font-semibold text-ink-soft transition-colors hover:border-aura-violet/60 hover:bg-aura-violet/5 hover:text-ink"
+          className="group self-end border border-dashed border-ink/25 bg-none rounded-full flex justify-center items-center gap-1 text-xs font-semibold text-ink-soft transition-colors hover:border-aura-violet/60 hover:bg-aura-violet/5 hover:text-ink"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

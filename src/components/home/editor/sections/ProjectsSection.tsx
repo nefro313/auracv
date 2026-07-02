@@ -254,7 +254,7 @@ export default function ProjectsSection() {
                               );
                             }
                           }}
-                          className="min-w-[40px] h-[40px] p-0 rounded-full"
+                          className="min-w-11 w-11 h-11 p-0 rounded-full"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

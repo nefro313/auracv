@@ -6,7 +6,7 @@ import { EducationCard } from "@/components/education-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { tailwindColors, externalHref } from "@/lib/utils";
+import { tailwindColors, externalHref, faviconUrl } from "@/lib/utils";
 import { UserProfile } from "@/lib/type";
 import { AwardCard } from "@/components/award-card";
 import PillNav from "@/components/ui/pill-nav";
@@ -18,8 +18,8 @@ const socialMediaImages: { [key: string]: string } = {
   X: "/icon/twitter.png",
   Youtube: "/icon/youtube.png",
   Medium: "/icon/medium.svg",
-  dribbble: "/icon/dribbble.png",
-  default: "/icon/dribbble.png",
+  Dribbble: "/icon/dribbble.png",
+  default: "/icon/link.svg",
 };
 
 /* Editorial section heading: serif title + a hairline rule running to the edge. */
@@ -167,13 +167,17 @@ export default function Page({
     ...user.basics.profiles
       .filter((profile) => profile.url)
       .map((profile) => ({
-        label: profile.network,
+        label: profile.network || stripUrl(profile.url),
         value: profile.username || stripUrl(profile.url),
         href: externalHref(profile.url),
         external: true,
         icon: (
           <img
-            src={socialMediaImages[profile.network] || socialMediaImages.default}
+            src={
+              socialMediaImages[profile.network] ||
+              faviconUrl(profile.url) ||
+              socialMediaImages.default
+            }
             alt=""
             className="size-5 object-contain"
           />
@@ -618,7 +622,7 @@ export default function Page({
               </Link>
             </div>
 
-            <div className="relative mt-9 flex items-center justify-center gap-3">
+            <div className="relative mt-9 flex flex-wrap items-center justify-center gap-3">
               <Link
                 href={"mailto:" + user.basics.email}
                 target="_blank"
@@ -655,6 +659,7 @@ export default function Page({
                       <img
                         src={
                           socialMediaImages[profile.network] ||
+                          faviconUrl(profile.url) ||
                           socialMediaImages.default
                         }
                         alt={`${profile.network} icon`}
@@ -720,7 +725,7 @@ export default function Page({
                 </Link>
               ))}
             </nav>
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:justify-end">
               {user.basics.email && (
                 <a
                   href={`mailto:${user.basics.email}`}
@@ -756,6 +761,7 @@ export default function Page({
                       <img
                         src={
                           socialMediaImages[profile.network] ||
+                          faviconUrl(profile.url) ||
                           socialMediaImages.default
                         }
                         alt={`${profile.network} icon`}
