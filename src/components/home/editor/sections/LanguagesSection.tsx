@@ -1,0 +1,105 @@
+"use client";
+
+import { Button, Input } from "@nextui-org/react";
+import React from "react";
+import { useEditor } from "../EditorContext";
+import RemoveButton from "../RemoveButton";
+
+export default function LanguagesSection() {
+  const {
+    user,
+    setUser,
+    handleInputChange,
+    deleteItemByIndex,
+    addLanguages,
+  } = useEditor();
+
+  return (
+          <div
+            id="languages"
+            className="scroll-mt-20 flex flex-col pt-11 justify-center items-start gap-4"
+          >
+            <h2 className="font-fraunces text-2xl font-medium tracking-tight text-ink mb-5">
+              Languages
+            </h2>
+            {user.languages &&
+              user.languages.length > 0 &&
+              user.languages.map((language, index) => (
+                <div
+                  key={`language-${index}`}
+                  className="flex flex-col w-full gap-4 border border-ink/10 bg-parchment-100/40 rounded-2xl p-5"
+                >
+                  <div className="w-full flex justify-end">
+                    <RemoveButton onClick={() =>
+                        deleteItemByIndex("languages", index, setUser)} label={`Delete language ${index}`} />
+                  </div>
+                  <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
+                    <p className="pt-.05">Language</p>
+                    <Input
+                      type="text"
+                      variant="bordered"
+                      value={language.language}
+                      placeholder="e.g. English"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleInputChange(
+                          "languages",
+                          index,
+                          "language",
+                          e.target.value,
+                        )
+                      }
+                      className="max-w-xs text-ink-soft"
+                      classNames={{
+                        inputWrapper:
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                      }}
+                    />
+                  </div>
+                  <div className="flex sm:flex-row flex-col gap-2 sm:gap-0 w-full justify-between text-sm items-start">
+                    <p className="pt-.05">Fluency</p>
+                    <Input
+                      type="text"
+                      variant="bordered"
+                      value={language.fluency}
+                      placeholder="e.g. Native"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleInputChange(
+                          "languages",
+                          index,
+                          "fluency",
+                          e.target.value,
+                        )
+                      }
+                      className="max-w-xs text-ink-soft"
+                      classNames={{
+                        inputWrapper:
+                          "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            <Button
+              variant="bordered"
+              onPress={addLanguages}
+              className="group border border-dashed border-ink/25 bg-none rounded-full flex justify-center items-center gap-1 text-sm font-semibold text-ink-soft transition-all duration-200 ease-out hover:border-aura-violet/60 hover:bg-aura-violet/5 hover:text-ink hover:scale-[1.02] active:scale-95"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-5 text-ink-soft transition-transform duration-200 ease-out group-hover:rotate-90"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                />
+              </svg>
+              Add Language
+            </Button>
+          </div>
+  );
+}

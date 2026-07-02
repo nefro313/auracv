@@ -6,12 +6,16 @@ import { Spinner } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { useCommonContext } from "@/Common_context";
 
-export default function page() {
+export default function Page() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { userData } = useCommonContext();
   if (userData) {
-    router.push("/home");
+    // Already signed in — greet them on the way to the studio.
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("auracv:welcome", "1");
+    }
+    router.push("/studio");
   }
   const SigninWithGoogle = async () => {
     setLoading(true);

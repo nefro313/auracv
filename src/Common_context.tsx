@@ -39,7 +39,7 @@ export function CommonContextProvider({
   const [user, setUser] = useState<any>(null);
   const [Current_page, setCurrent_page] = useState<string>("Home");
   const router = useRouter();
-   useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
@@ -56,7 +56,7 @@ export function CommonContextProvider({
     setCurrent_page(page);
   };
 
-/*
+  /*
 Previous Logout logic 
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -73,10 +73,10 @@ Issues found within the previous logout logic:
   - The user session may still exist when you push the route. Make sure the session is fully cleared before routing.
 */
 
-/* New logout logic
+  /* New logout logic
   - The user session is cleared before redirecting to the login page.
   - The user is set to null after logging out.
-  - Redirecting to /login after ensuring the session is cleared will prevent the flickering between /home and /login.
+  - Redirecting to /login after ensuring the session is cleared will prevent the flickering between /studio and /login.
 
 
 */

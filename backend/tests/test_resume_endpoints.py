@@ -1,4 +1,8 @@
-"""Endpoint tests with the external IO (PDF fetch, scrape, OpenAI) mocked."""
+"""Endpoint tests with the external IO (PDF fetch, OpenAI) mocked.
+
+Orchestration moved into `app/workflows/profile.py`, so the service
+functions are patched where the workflow imports them (not the route module).
+"""
 
 from __future__ import annotations
 
@@ -18,7 +22,7 @@ def test_extract_pdf_maps_pdf_error(client: TestClient, monkeypatch) -> None:
     async def boom(_url: str) -> str:
         raise PdfError("bad pdf")
 
-    monkeypatch.setattr("app.api.routes.resume.pdf_url_to_text", boom)
+    monkeypatch.setattr("app.workflows.profile.pdf_url_to_text", boom)
 
     resp = client.post("/extract-pdf", json={"pdfUrl": "http://x/y.pdf"})
     assert resp.status_code == 422
@@ -32,8 +36,8 @@ def test_extract_pdf_happy_path(client: TestClient, monkeypatch) -> None:
     async def fake_extract(_text: str, *, source: str) -> UserProfile:
         return UserProfile.model_validate({"basics": {"name": "Jane Dev"}})
 
-    monkeypatch.setattr("app.api.routes.resume.pdf_url_to_text", fake_text)
-    monkeypatch.setattr("app.api.routes.resume.extract_profile", fake_extract)
+    monkeypatch.setattr("app.workflows.profile.pdf_url_to_text", fake_text)
+    monkeypatch.setattr("app.workflows.profile.extract_profile", fake_extract)
 
     resp = client.post("/extract-pdf", json={"pdfUrl": "http://x/y.pdf"})
     assert resp.status_code == 200

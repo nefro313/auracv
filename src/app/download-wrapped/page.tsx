@@ -5,9 +5,10 @@ import { supabase } from "@/utils/supabase/client";
 import { useCommonContext } from "@/Common_context";
 import GithubCard from "@/components/github_wrap_portfolio/github-card";
 import GithubCard2 from "@/components/github_wrap/github-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toPng } from "html-to-image";
 
-export default function page() {
+export default function Page() {
   const router = useRouter();
   const { userData } = useCommonContext();
   const [isLoading, setIsLoading] = useState(true);
@@ -78,15 +79,27 @@ export default function page() {
           transformOrigin: "center",
         }}
       >
-        {!isLoading && githubData && (
-          <>
-            <div className="sm:hidden block">
-              <GithubCard data={githubData} />
+        {isLoading ? (
+          <div className="loading flex w-full max-w-md flex-col gap-5">
+            <Skeleton className="mx-auto h-7 w-56 bg-white/10" />
+            <Skeleton className="h-64 w-full rounded-2xl bg-white/10" />
+            <div className="grid grid-cols-3 gap-4">
+              <Skeleton className="h-20 rounded-xl bg-white/10" />
+              <Skeleton className="h-20 rounded-xl bg-white/10" />
+              <Skeleton className="h-20 rounded-xl bg-white/10" />
             </div>
-            <div className="hidden sm:block">
-              <GithubCard2 data={githubData} />
-            </div>
-          </>
+          </div>
+        ) : (
+          githubData && (
+            <>
+              <div className="sm:hidden block">
+                <GithubCard data={githubData} />
+              </div>
+              <div className="hidden sm:block">
+                <GithubCard2 data={githubData} />
+              </div>
+            </>
+          )
         )}
       </div>
     </div>

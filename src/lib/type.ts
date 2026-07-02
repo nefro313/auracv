@@ -4,6 +4,7 @@ export const reservedWords = [
   "auth",
   "profile",
   "home",
+  "studio",
   "login",
   "signup",
   "logout",
@@ -127,6 +128,9 @@ export type Basics = {
   location: Location;
   profiles: Profile[];
   skills: string[];
+  // Whether the person is currently open to work (shown as a badge on the
+  // portfolio). Optional so existing saved profiles stay valid.
+  openToWork?: boolean;
 };
 
 // Certificates
@@ -143,6 +147,7 @@ export type Education = {
   startDate: string;
   area: string;
   studyType: string;
+  summary: string;
   institution: string;
   url: string;
   logo: string;

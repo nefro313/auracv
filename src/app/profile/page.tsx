@@ -10,12 +10,12 @@ function Page() {
     <div className="min-h-screen bg-parchment-100 font-outfit text-ink antialiased">
       <Navbar />
 
-      {/* Desktop: rail + content. Mobile: content only. */}
+      {/* Desktop: rail + content. Phone/tablet: content only (nav lives in the Navbar). */}
       <div className="grid grid-cols-12">
-        <aside className="hidden sm:col-span-1 sm:block">
+        <aside className="hidden lg:col-span-1 lg:block">
           <Left_panel />
         </aside>
-        <main className="col-span-12 border-ink/10 sm:col-span-11 sm:border-l">
+        <main className="col-span-12 border-ink/10 lg:col-span-11 lg:border-l">
           <Profile />
         </main>
       </div>

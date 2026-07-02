@@ -2,7 +2,7 @@
 import { getCookie } from "cookies-next/client";
 import DotPattern from "@/components/magicui/dot-pattern";
 import React, { useRef, useState, useEffect } from "react";
-import { avatar, Input, user } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import type { ConfettiRef } from "@/components/magicui/confetti";
 import { supabase } from "@/utils/supabase/client";
 import { setCookie } from "cookies-next/client";
@@ -16,15 +16,7 @@ import { Tabs, Tab } from "@nextui-org/react";
 import AnimatedCircularProgressBar from "@/components/magicui/animated-circular-progress-bar";
 import withAuth from "@/utils/authProtect";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/use-toast";
-import { link } from "fs";
-interface User {
-  userId: string;
-  email: string;
-  avatarUrl: string;
-  userName?: string; // Make userName optional
-  fullName: string;
-}
+import { useNotifications } from "@/components/ui/notification";
 
 /** Turn an axios/unknown error into a user-facing message, preferring the
  *  backend's `{ error: { message } }` envelope and handling network/timeouts. */
@@ -46,7 +38,7 @@ function describeError(error: unknown): string {
 function Page() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { toast } = useToast();
+  const { notify, viewport: notificationViewport } = useNotifications();
   const { userData } = useCommonContext();
   const confettiRef = useRef<ConfettiRef>(null);
   const [shopSlug, setShopSlug] = useState("");
@@ -133,7 +125,9 @@ function Page() {
         return;
       }
       if (data.length > 0) {
-        router.push("/home");
+        // Returning user with a portfolio — greet them while /studio loads.
+        sessionStorage.setItem("auracv:welcome", "1");
+        router.push("/studio");
         return;
       }
       if (data.length === 0) {
@@ -145,7 +139,7 @@ function Page() {
   }, [userData]);
   if (loading) {
     return (
-      <div className="flex h-screen w-full flex-col items-center bg-parchment-100 px-7">
+      <div className="flex min-h-screen w-full flex-col items-center bg-parchment-100 px-7">
         <div className="mt-28 flex w-full max-w-sm flex-col items-center gap-8">
           {/* heading */}
           <Skeleton className="h-9 w-64" />
@@ -280,6 +274,11 @@ function Page() {
               url: "",
               network: "Dribbble",
             },
+            {
+              username: "",
+              url: "",
+              network: "Medium",
+            },
           ],
         },
         certificates: [
@@ -296,6 +295,7 @@ function Page() {
             startDate: "",
             area: "",
             studyType: "",
+            summary: "",
             institution: "",
             url: "",
             logo: "",
@@ -404,20 +404,22 @@ function Page() {
     }
 
     if (!error) {
-      router.push("/home");
+      router.push("/studio");
     }
   };
 
   const generateai = async () => {
     if (!resumeUrl) {
-      toast({
+      notify({
+        variant: "warning",
         title: "Resume required",
         description: "Please upload your resume (PDF) to generate your portfolio.",
       });
       return;
     }
     if (!shopSlug) {
-      toast({
+      notify({
+        variant: "warning",
         title: "Portfolio domain required",
         description: "Please enter your portfolio domain.",
       });
@@ -506,8 +508,8 @@ function Page() {
 
         if (error) {
           console.error("Error inserting user:", error);
-          toast({
-            variant: "destructive",
+          notify({
+            variant: "error",
             title: "Couldn't save your portfolio",
             description:
               "Your resume was parsed but we couldn't save it. Please try again.",
@@ -517,13 +519,13 @@ function Page() {
           return null;
         }
         setValue(100);
-        router.push("/home");
+        router.push("/studio");
 
         console.log("AI Generated Result:", result);
       } catch (error) {
         console.error("Error in AI generation:", error);
-        toast({
-          variant: "destructive",
+        notify({
+          variant: "error",
           title: "Couldn't generate your portfolio",
           description: describeError(error),
         });
@@ -535,11 +537,12 @@ function Page() {
   };
 
   return (
-    <div className="flex h-screen w-full flex-col bg-parchment-100 font-outfit text-ink antialiased">
+    <div className="flex min-h-screen w-full flex-col bg-parchment-100 font-outfit text-ink antialiased">
+      {notificationViewport}
       <div>
         <Navbar />
       </div>
-      <div className="w-full h-full px-7 flex flex-col justify-between items-center ">
+      <div className="w-full flex-1 px-7 flex flex-col justify-between items-center py-10">
         {aiCreating ? (
           <div className="flex mt-44 justify-start flex-col items-center gap-10">
             <DotPattern className="absolute mt-16 [mask-image:radial-gradient(300px_circle_at_center,white,transparent)]" />
@@ -565,7 +568,7 @@ function Page() {
               placeholder=""
               labelPlacement="outside"
               label="Claim your portfolio domain"
-              className="z-50 inputbar col-span-1 flex w-full max-w-sm justify-center rounded-xl font-outfit text-lg font-semibold text-ink-soft min-w-lg sm:col-span-2"
+              className="z-50 inputbar flex w-full max-w-sm justify-center rounded-xl font-outfit text-lg font-semibold text-ink-soft"
               size="lg"
               classNames={{
                 input: "font-semibold text-lg",

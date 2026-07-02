@@ -6,6 +6,39 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Normalize a user-entered link to an absolute URL so it opens the real site.
+ * A bare domain like "linkedin.com" is otherwise treated as a relative path and
+ * resolves to "<our-domain>/linkedin.com". Internal paths ("/resume"),
+ * mailto:/tel:, and links that already carry a protocol are left untouched.
+ * Empty input returns "" so existing `href || "#"` fallbacks still apply.
+ */
+export function externalHref(url?: string | null): string {
+  const trimmed = (url ?? "").trim();
+  if (!trimmed) return "";
+  if (/^(https?:\/\/|mailto:|tel:|\/)/i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("//")) return `https:${trimmed}`;
+  return `https://${trimmed}`;
+}
+
+/**
+ * Favicon (site icon) for an arbitrary URL via Google's public favicon
+ * service. Lets user-added custom links show the destination site's own icon
+ * without bundling one. Returns "" when the URL can't be parsed so callers can
+ * fall back to a default icon.
+ */
+export function faviconUrl(url?: string | null, size = 64): string {
+  const href = externalHref(url);
+  if (!href) return "";
+  try {
+    const { hostname } = new URL(href);
+    if (!hostname) return "";
+    return `https://www.google.com/s2/favicons?sz=${size}&domain=${hostname}`;
+  } catch {
+    return "";
+  }
+}
+
 export const tailwindColors = [
   { name: "red", value: "#ef4444" },
   { name: "green", value: "#10b981" },
@@ -66,6 +99,7 @@ export const initialUserState: UserProfile =
     website: "",
     resumeUrl: "",
     email: "",
+    openToWork: false,
     skills: [],
     location: {
       city: "",
@@ -97,6 +131,11 @@ export const initialUserState: UserProfile =
         url: "",
         network: "Dribbble",
       },
+      {
+        username: "",
+        url: "",
+        network: "Medium",
+      },
     ],
   },
   certificates: [
@@ -113,6 +152,7 @@ export const initialUserState: UserProfile =
       startDate: "",
       area: "",
       studyType: "",
+      summary: "",
       institution: "",
       url: "",
       logo: "",
@@ -214,3 +254,50 @@ export const initialUserState: UserProfile =
     },
   ],
 };
+
+/**
+ * Portfolio "completeness" — a friendly 0–100 signal for how filled-out a
+ * profile is. Shared by the Profile page and the post-login Welcome screen so
+ * both always show the same number. `avatarUrl` lets callers fold in an avatar
+ * that lives outside resumeJson (e.g. the OAuth session photo).
+ */
+export function profileCompleteness(
+  profile?: UserProfile | null,
+  avatarUrl?: string,
+): number {
+  if (!profile) return 0;
+
+  const b = profile.basics;
+  const hasText = (v?: string) => Boolean(v && v.trim());
+
+  // Count a section "done" only when it has real content — array length alone
+  // is misleading because new profiles seed empty placeholder rows (e.g. five
+  // blank social links, a blank work/education/project row), which would
+  // otherwise read as 100% complete on a near-empty profile.
+  const checks = [
+    hasText(b?.name),
+    hasText(b?.about),
+    hasText(avatarUrl) || hasText(b?.avatarUrl),
+    skillCount(profile) > 0,
+    (profile.work ?? []).some((w) => hasText(w?.name) || hasText(w?.position)),
+    (profile.projects?.projects ?? []).some(
+      (p) => hasText(p?.title) || hasText(p?.description),
+    ),
+    (profile.education ?? []).some(
+      (e) => hasText(e?.institution) || hasText(e?.area),
+    ),
+    (b?.profiles ?? []).some((p) => hasText(p?.url)),
+  ];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+/**
+ * A friendly "how many skills" count, taken from the General Info tag list
+ * (`basics.skills`). Empty tags are ignored, so a profile with none reads as 0.
+ */
+export function skillCount(profile?: UserProfile | null): number {
+  if (!profile) return 0;
+  return (profile.basics?.skills ?? []).filter(
+    (s) => typeof s === "string" && s.trim(),
+  ).length;
+}

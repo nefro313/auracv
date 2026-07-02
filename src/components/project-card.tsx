@@ -1,13 +1,7 @@
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import Link from "next/link";
 import Markdown from "react-markdown";
 import { ProjectDetail } from "@/lib/type";
+import { externalHref } from "@/lib/utils";
 
 export function ProjectCard({
   title,
@@ -16,58 +10,88 @@ export function ProjectCard({
   image,
   website,
   source,
+  duration,
+  highlights,
 }: ProjectDetail) {
   return (
-    <Card className="group flex h-full flex-col overflow-hidden rounded-2xl border border-ink/10 bg-white/60 font-outfit shadow-none transition-all duration-300 ease-out hover:-translate-y-1 hover:border-ink/20 hover:bg-white hover:shadow-[0_24px_50px_-26px_rgba(33,27,18,0.4)]">
-      {/* Aura accent — consistent brand strip in place of a random gradient */}
-      <div
-        aria-hidden
-        className="h-1 w-full bg-gradient-to-r from-aura-violet to-aura-cyan"
-      />
+    <article className="glass-card group flex h-full flex-col rounded-3xl p-5 font-outfit transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white/80 sm:p-6">
+      {/* Header: glass tile (image or monogram) · title · duration */}
+      <div className="flex items-center gap-4">
+        <div className="glass-tile flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl">
+          {image ? (
+            <img
+              src={image}
+              alt={title}
+              className="h-full w-full object-cover object-top"
+            />
+          ) : (
+            <span className="font-fraunces text-lg font-medium text-ink">
+              {title?.[0] ?? "•"}
+            </span>
+          )}
+        </div>
 
-      {image && (
-        <Link href={website || "#"} className="block cursor-pointer">
-          <img
-            src={image}
-            alt={title}
-            className="h-40 w-full object-cover object-top"
-          />
-        </Link>
+        <h3 className="min-w-0 flex-1 font-fraunces text-lg font-semibold leading-snug tracking-tight text-ink">
+          {title}
+        </h3>
+
+        {duration && (
+          <span className="glass-chip shrink-0 rounded-full px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-soft">
+            {duration}
+          </span>
+        )}
+      </div>
+
+      {/* Body: summary + highlights on readable ink */}
+      {(description || (highlights && highlights.length > 0)) && (
+        <div className="mt-4 border-t border-ink/10 pt-4">
+          {description && (
+            <div className="max-w-full text-pretty text-[0.9rem]/relaxed font-medium text-ink-soft [&_a]:font-semibold [&_a]:text-aura-violet [&_strong]:text-ink">
+              <Markdown>{description}</Markdown>
+            </div>
+          )}
+
+          {highlights && highlights.length > 0 && (
+            <ul className={description ? "mt-3 space-y-2.5" : "space-y-2.5"}>
+              {highlights.map((highlight, index) => (
+                <li
+                  key={`projHighlight-${index}`}
+                  className="flex gap-3 text-[0.9rem]/relaxed font-medium text-ink-soft"
+                >
+                  <span
+                    aria-hidden
+                    className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-gradient-to-br from-aura-violet to-aura-cyan"
+                  />
+                  <span className="min-w-0">{highlight}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
 
-      <CardHeader className="p-4 pb-2">
-        <CardTitle className="font-fraunces text-lg font-medium leading-tight tracking-tight text-ink">
-          {title}
-        </CardTitle>
-        {description && (
-          <div className="prose mt-1.5 max-w-full text-pretty text-xs/relaxed font-medium text-ink-mute">
-            <Markdown>{description}</Markdown>
-          </div>
-        )}
-      </CardHeader>
+      {/* Tech stack */}
+      {technologies && technologies.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {technologies.map((tech, index) => (
+            <span
+              className="glass-chip rounded-full px-2.5 py-1 text-[0.7rem] font-semibold text-ink-soft"
+              key={`badgeCard-${index}`}
+            >
+              {tech}
+            </span>
+          ))}
+        </div>
+      )}
 
-      <CardContent className="mt-auto flex flex-col px-4">
-        {technologies && technologies.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {technologies.map((tech, index) => (
-              <span
-                className="rounded-full bg-parchment-200 px-2.5 py-0.5 text-[0.67rem] font-semibold text-ink-soft"
-                key={`badgeCard-${index}`}
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        )}
-      </CardContent>
-
-      <CardFooter className="px-4 pb-4 pt-3">
-        <div className="flex flex-row flex-wrap items-start gap-2">
+      {/* Links */}
+      {(website || source) && (
+        <div className="mt-auto flex flex-row flex-wrap items-center gap-2 pt-4">
           {website && (
             <Link
-              href={website}
+              href={externalHref(website)}
               target="_blank"
-              className="flex items-center gap-1.5 rounded-full border border-ink/15 px-3.5 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-ink/30 hover:text-ink"
+              className="glass-chip flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-ink-soft transition hover:text-ink"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -88,15 +112,29 @@ export function ProjectCard({
           )}
           {source && (
             <Link
-              href={source}
+              href={externalHref(source)}
               target="_blank"
-              className="flex items-center gap-1.5 rounded-full border border-ink/15 px-3.5 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-ink/30 hover:text-ink"
+              className="glass-chip flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-ink-soft transition hover:text-ink"
             >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.6}
+                stroke="currentColor"
+                className="size-3.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z"
+                />
+              </svg>
               Source code
             </Link>
           )}
         </div>
-      </CardFooter>
-    </Card>
+      )}
+    </article>
   );
 }

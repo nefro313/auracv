@@ -13,10 +13,14 @@ export function HackathonCard({
 }: HackathonDetail) {
   return (
     <li className="relative ml-10 py-6">
-      <div className="absolute -left-[3.65rem] top-6 flex items-center justify-center rounded-full bg-parchment-100 p-0.5">
-        <Avatar className="size-12 border border-ink/10 bg-parchment-50">
-          <AvatarImage src={image} alt={title} className="object-contain" />
-          <AvatarFallback className="bg-parchment-200 text-sm font-semibold text-ink-soft">
+      <div className="absolute -left-[3.65rem] top-6 flex items-center justify-center rounded-2xl bg-parchment-100 p-0.5">
+        <Avatar className="size-12 overflow-hidden rounded-2xl">
+          <AvatarImage
+            src={image}
+            alt={title}
+            className="rounded-2xl object-contain"
+          />
+          <AvatarFallback className="glass-tile rounded-2xl font-fraunces text-lg font-medium text-ink">
             {title[0]}
           </AvatarFallback>
         </Avatar>
@@ -38,7 +42,7 @@ export function HackathonCard({
           </p>
         )}
         {win && (
-          <span className="mt-1 w-fit rounded-full bg-parchment-200 px-2.5 py-0.5 text-xs font-semibold text-ink-soft">
+          <span className="glass-chip mt-1 w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold text-ink-soft">
             {win}
           </span>
         )}

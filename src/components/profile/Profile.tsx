@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Spinner } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { useCommonContext } from "@/Common_context";
 import { supabase } from "@/utils/supabase/client";
 import { UserProfile } from "@/lib/type";
+import { profileCompleteness, skillCount } from "@/lib/utils";
+import { ProfileSkeleton } from "@/components/ui/skeletons";
 
 type Row = {
   userName: string;
@@ -74,29 +75,16 @@ export default function Profile() {
     return [
       { label: "Experience", value: r?.work?.length ?? 0 },
       { label: "Projects", value: r?.projects?.projects?.length ?? 0 },
-      { label: "Skills", value: r?.basics?.skills?.length ?? 0 },
+      { label: "Skills", value: skillCount(r) },
       { label: "Education", value: r?.education?.length ?? 0 },
     ];
   }, [row]);
 
   // Portfolio completeness — a friendly "how filled-out is this" signal.
-  const completeness = useMemo(() => {
-    const r = row?.resumeJson;
-    if (!r) return 0;
-    const checks = [
-      Boolean(r.basics?.name),
-      Boolean(r.basics?.about),
-      Boolean(avatar),
-      Boolean(r.basics?.skills?.length),
-      Boolean(r.work?.length),
-      Boolean(r.projects?.projects?.length),
-      Boolean(r.education?.length),
-      Boolean(r.basics?.profiles?.length),
-    ];
-    return Math.round(
-      (checks.filter(Boolean).length / checks.length) * 100,
-    );
-  }, [row, avatar]);
+  const completeness = useMemo(
+    () => profileCompleteness(row?.resumeJson, avatar),
+    [row, avatar],
+  );
 
   const memberSince = userData?.user?.created_at
     ? new Date(userData.user.created_at).toLocaleDateString("en-US", {
@@ -106,11 +94,7 @@ export default function Profile() {
     : "—";
 
   if (loading) {
-    return (
-      <div className="flex h-[60vh] w-full items-center justify-center">
-        <Spinner color="secondary" label="Loading your profile…" />
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   return (
@@ -131,24 +115,33 @@ export default function Profile() {
 
       <div className="relative z-10 mx-auto w-full max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
         {/* ---------------- Hero ---------------- */}
-        <header className="animate-fade-up flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-          <div className="relative shrink-0">
-            <div
-              aria-hidden
-              className="absolute -inset-1 rounded-full bg-gradient-to-tr from-aura-violet to-aura-cyan opacity-70 blur-[2px]"
-            />
-            {avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatar}
-                alt={displayName}
-                className="relative h-24 w-24 rounded-full object-cover ring-4 ring-parchment-50"
+        <header className="animate-fade-up flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-6">
+          {/* Phones: avatar (left) + Edit (right) share the top row; name sits below. */}
+          <div className="flex w-full items-center justify-between sm:block sm:w-auto">
+            <div className="relative shrink-0">
+              <div
+                aria-hidden
+                className="absolute -inset-1 rounded-full bg-gradient-to-tr from-aura-violet to-aura-cyan opacity-70 blur-[2px]"
               />
-            ) : (
-              <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-ink font-fraunces text-3xl text-parchment-50 ring-4 ring-parchment-50">
-                {displayName.charAt(0).toUpperCase()}
-              </div>
-            )}
+              {avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatar}
+                  alt={displayName}
+                  className="relative h-20 w-20 rounded-full object-cover ring-4 ring-parchment-50 sm:h-24 sm:w-24"
+                />
+              ) : (
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-ink font-fraunces text-3xl text-parchment-50 ring-4 ring-parchment-50 sm:h-24 sm:w-24">
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <Link href="/studio" className="shrink-0 sm:hidden">
+              <span className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-parchment-50 transition duration-300 hover:shadow-[0_0_28px_-6px_rgba(139,92,246,0.65)]">
+                <PencilIcon />
+                Edit Portfolio
+              </span>
+            </Link>
           </div>
 
           <div className="min-w-0 flex-1">
@@ -165,10 +158,10 @@ export default function Profile() {
             )}
           </div>
 
-          <Link href="/home" className="shrink-0">
+          <Link href="/studio" className="hidden shrink-0 sm:block">
             <span className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-parchment-50 transition duration-300 hover:shadow-[0_0_28px_-6px_rgba(139,92,246,0.65)]">
               <PencilIcon />
-              Edit portfolio
+              Edit Portfolio
             </span>
           </Link>
         </header>

@@ -42,7 +42,7 @@ export default function Hero() {
 
   useEffect(() => {
     if (userData) {
-      router.push("/home");
+      router.push("/studio");
     }
   }, [userData, router]);
 

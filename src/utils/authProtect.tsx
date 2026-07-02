@@ -2,8 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase/client";
-import { Spinner } from "@nextui-org/react";
-// import Loader from "@/components/layout/Loader";
+import { AppShellSkeleton } from "@/components/ui/skeletons";
 
 const withAuth = <P extends object>(
   WrappedComponent: React.ComponentType<P>
@@ -14,7 +13,7 @@ const withAuth = <P extends object>(
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const { data, error } = await supabase.auth.getSession();
+          const { data } = await supabase.auth.getSession();
           setUser(data.session);
           if (!data.session) {
             router.push("/login");
@@ -27,12 +26,7 @@ const withAuth = <P extends object>(
       fetchData();
     }, [router]);
 
-    if (!user)
-      return (
-        <div className="w-full h-screen flex justify-center items-center">
-          <Spinner color="default" />
-        </div>
-      );
+    if (!user) return <AppShellSkeleton />;
 
     return <WrappedComponent {...props} />;
   };

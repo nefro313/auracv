@@ -1,5 +1,4 @@
 import Hero from "@/components/landingpage/Hero";
-import Temp_1 from "@/components/design/temp_1";
 import { headers } from "next/headers";
 import { UserProfile } from "@/lib/type";
 import ResumeTemplate from "@/components/design/resume_template";

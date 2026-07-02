@@ -48,6 +48,8 @@ export default function NumberTicker({
         className,
       )}
       ref={ref}
-    />
+    >
+      {direction === "down" ? value : 0}
+    </span>
   );
 }
