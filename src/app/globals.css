@@ -21,6 +21,34 @@
   color: transparent;
 }
 
+/* Animated sibling of .text-aura-gradient — a slow violet↔cyan sheen that
+   drifts across a single focal accent on the landing hero. Kept separate so
+   the static gradient used app-wide (logo, resume templates) stays untouched. */
+.text-aura-sheen {
+  background-image: linear-gradient(100deg, #8b5cf6, #06b6d4, #8b5cf6);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: aura-sheen 6s ease-in-out infinite;
+}
+
+@keyframes aura-sheen {
+  0%,
+  100% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-aura-sheen {
+    animation: none;
+  }
+}
+
 /* ---- Liquid-glass surfaces (Atelier Paper) --------------------------- */
 @layer components {
   /* Frosted translucent panel — the page's primary glass surface. */
