@@ -7,6 +7,7 @@ import { setCookie } from "cookies-next/client";
 import { useCommonContext } from "@/Common_context";
 import { reservedWords } from "@/lib/type";
 import { AuraLogo } from "@/components/brand/logo";
+import { Reveal } from "@/components/ui/reveal";
 import { MarqueeDemo } from "./Marquee";
 import { PortfolioCountButton } from "./PortfolioCountButton";
 import Footer from "./Footer";
@@ -154,7 +155,7 @@ export default function Hero() {
 
           <h1 className="animate-fade-up mt-6 max-w-4xl font-fraunces text-5xl font-medium leading-[1.05] tracking-tight [animation-delay:120ms] sm:text-7xl">
             The portfolio your résumé{" "}
-            <em className="text-aura-gradient italic">deserves.</em>
+            <em className="text-aura-sheen italic">deserves.</em>
           </h1>
 
           <p className="animate-fade-up mt-6 max-w-xl text-base/relaxed font-medium text-ink-soft [animation-delay:220ms] sm:text-lg/relaxed">
@@ -244,73 +245,78 @@ export default function Hero() {
         >
           &ldquo;
         </span>
-        <blockquote className="relative mx-auto max-w-4xl px-6 text-center font-fraunces text-3xl font-medium leading-tight tracking-tight sm:text-5xl">
-          Too busy doing the work to{" "}
-          <em className="text-aura-gradient italic">showcase</em> it? That
-          &rsquo;s exactly the point.
-        </blockquote>
-        <p className="relative mt-6 text-center text-base font-medium text-ink-mute sm:text-lg">
-          AuraCV reads your résumé — and does the showing off for you.
-        </p>
+        <Reveal>
+          <blockquote className="relative mx-auto max-w-4xl px-6 text-center font-fraunces text-3xl font-medium leading-tight tracking-tight sm:text-5xl">
+            Too busy doing the work to{" "}
+            <em className="text-aura-gradient italic">showcase</em> it? That
+            &rsquo;s exactly the point.
+          </blockquote>
+          <p className="relative mt-6 text-center text-base font-medium text-ink-mute sm:text-lg">
+            AuraCV reads your résumé — and does the showing off for you.
+          </p>
+        </Reveal>
       </section>
 
       {/* ---------------- How it works ---------------- */}
       <section className="relative mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-28">
-        <div className="flex items-center gap-5">
-          <h2 className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-ink-mute sm:text-xs">
-            How it works
-          </h2>
-          <div className="h-px flex-1 bg-ink/10" />
-        </div>
+        <Reveal>
+          <div className="flex items-center gap-5">
+            <h2 className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-ink-mute sm:text-xs">
+              How it works
+            </h2>
+            <div className="h-px flex-1 bg-ink/10" />
+          </div>
+        </Reveal>
 
         <div className="mt-12 grid gap-5 sm:grid-cols-3">
-          {steps.map((step) => (
-            <article
-              key={step.number}
-              className="group rounded-3xl border border-ink/10 bg-white/60 p-8 transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:shadow-[0_24px_50px_-24px_rgba(33,27,18,0.25)]"
-            >
-              <p className="text-aura-gradient font-fraunces text-4xl font-medium italic">
-                {step.number}
-              </p>
-              <h3 className="mt-5 font-fraunces text-xl font-semibold tracking-tight">
-                {step.title}
-              </h3>
-              <p className="mt-3 text-sm/relaxed font-medium text-ink-soft">
-                {step.body}
-              </p>
-            </article>
+          {steps.map((step, index) => (
+            <Reveal key={step.number} delay={index * 90} className="h-full">
+              <article className="group h-full rounded-3xl border border-ink/10 bg-white/60 p-8 transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:shadow-[0_24px_50px_-24px_rgba(33,27,18,0.25)]">
+                <p className="text-aura-gradient font-fraunces text-4xl font-medium italic">
+                  {step.number}
+                </p>
+                <h3 className="mt-5 font-fraunces text-xl font-semibold tracking-tight">
+                  {step.title}
+                </h3>
+                <p className="mt-3 text-sm/relaxed font-medium text-ink-soft">
+                  {step.body}
+                </p>
+              </article>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* ---------------- CTA band ---------------- */}
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8 sm:pb-28">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-ink px-7 py-16 text-center sm:px-16 sm:py-20">
-          <div
-            aria-hidden
-            className="absolute -bottom-32 -right-20 h-80 w-[28rem] rounded-full blur-3xl"
-            style={{
-              background:
-                "radial-gradient(closest-side, rgba(139,92,246,0.45), rgba(6,182,212,0.25) 60%, transparent)",
-            }}
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0 rounded-[2.5rem] ring-1 ring-inset ring-white/10"
-          />
-          <h2 className="relative font-fraunces text-3xl font-medium tracking-tight text-parchment-50 sm:text-5xl">
-            Claim your corner of the internet.
-          </h2>
-          <p className="relative mt-4 text-base font-medium text-parchment-300/90 sm:text-lg">
-            yourname<span className="text-aura-gradient">.auracv.me</span> is
-            free — and ready in about twenty seconds.
-          </p>
-          <Link href="/signup" className="relative mt-9 inline-block">
-            <span className="block rounded-full bg-parchment-50 px-8 py-3.5 text-sm font-semibold tracking-wide text-ink transition duration-300 hover:shadow-[0_0_36px_-4px_rgba(139,92,246,0.8)]">
-              Create your portfolio
-            </span>
-          </Link>
-        </div>
+        <Reveal>
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-ink px-7 py-16 text-center sm:px-16 sm:py-20">
+            <div
+              aria-hidden
+              className="absolute -bottom-32 -right-20 h-80 w-[28rem] rounded-full blur-3xl"
+              style={{
+                background:
+                  "radial-gradient(closest-side, rgba(139,92,246,0.45), rgba(6,182,212,0.25) 60%, transparent)",
+              }}
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 rounded-[2.5rem] ring-1 ring-inset ring-white/10"
+            />
+            <h2 className="relative font-fraunces text-3xl font-medium tracking-tight text-parchment-50 sm:text-5xl">
+              Claim your corner of the internet.
+            </h2>
+            <p className="relative mt-4 text-base font-medium text-parchment-300/90 sm:text-lg">
+              yourname<span className="text-aura-gradient">.auracv.me</span> is
+              free — and ready in about twenty seconds.
+            </p>
+            <Link href="/signup" className="relative mt-9 inline-block">
+              <span className="block rounded-full bg-parchment-50 px-8 py-3.5 text-sm font-semibold tracking-wide text-ink transition duration-300 hover:shadow-[0_0_36px_-4px_rgba(139,92,246,0.8)]">
+                Create your portfolio
+              </span>
+            </Link>
+          </div>
+        </Reveal>
       </section>
 
       <Footer />
