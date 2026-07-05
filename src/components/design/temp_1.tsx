@@ -674,7 +674,8 @@ export default function Page({
         </section>
       </main>
 
-      {/* ---------------- Footer ---------------- */}
+      {/* ---------------- Footer (public portfolio only, hidden in editor preview) ---------------- */}
+      {!preview && (
       <footer className="relative border-t border-ink/10 bg-parchment-50/40">
         <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8">
           {/* AuraCV call-to-action */}
@@ -809,6 +810,7 @@ export default function Page({
           </div>
         </div>
       </footer>
+      )}
     </div>
   );
 }
