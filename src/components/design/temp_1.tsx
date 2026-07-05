@@ -271,7 +271,7 @@ export default function Page({
       <main
         className={cn(
           "relative mx-auto w-full max-w-3xl px-5 pb-24 sm:px-8",
-          preview ? "pt-14 sm:pt-16" : "pt-36 sm:pt-44"
+          preview ? "pt-14 sm:pt-16" : "pt-36 sm:pt-44",
         )}
       >
         {/* ---------------- Masthead ---------------- */}
@@ -492,27 +492,29 @@ export default function Page({
           )}
 
         {/* ---------------- Awards ---------------- */}
-        {user.awards && user.awards.length > 0 && user.awards[0].title !== "" && (
-          <section id="awards" className="mt-20 scroll-mt-24">
-            <Reveal>
-              <SectionHeading label="Awards & certifications">
-                Recognitions and credentials earned along the way.
-              </SectionHeading>
-            </Reveal>
-            <div className="grid grid-cols-1 gap-4">
-              {user.awards.map((award, index) => (
-                <Reveal key={index} delay={index * 70}>
-                  <AwardCard
-                    title={award.title}
-                    date={award.date}
-                    issuer={award.awarder}
-                    description={award.summary}
-                  />
-                </Reveal>
-              ))}
-            </div>
-          </section>
-        )}
+        {user.awards &&
+          user.awards.length > 0 &&
+          user.awards[0].title !== "" && (
+            <section id="awards" className="mt-20 scroll-mt-24">
+              <Reveal>
+                <SectionHeading label="Awards & certifications">
+                  Recognitions and credentials earned along the way.
+                </SectionHeading>
+              </Reveal>
+              <div className="grid grid-cols-1 gap-4">
+                {user.awards.map((award, index) => (
+                  <Reveal key={index} delay={index * 70}>
+                    <AwardCard
+                      title={award.title}
+                      date={award.date}
+                      issuer={award.awarder}
+                      description={award.summary}
+                    />
+                  </Reveal>
+                ))}
+              </div>
+            </section>
+          )}
 
         {/* ---------------- Education ---------------- */}
         {hasEducation && (
@@ -592,154 +594,52 @@ export default function Page({
         {/* ---------------- Contact ---------------- */}
         <section id="contact" className="mt-24 scroll-mt-24">
           <Reveal>
-          <div className="relative overflow-hidden rounded-[2rem] bg-ink px-7 py-16 text-center sm:px-12">
-            <div
-              aria-hidden
-              className="absolute -bottom-24 -right-16 h-64 w-80 rounded-full blur-3xl"
-              style={{
-                background:
-                  "radial-gradient(closest-side, rgba(139,92,246,0.45), rgba(6,182,212,0.25) 60%, transparent)",
-              }}
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-white/10"
-            />
-            <h2 className="relative font-fraunces text-3xl font-medium tracking-tight text-parchment-50 sm:text-4xl">
-              Let&rsquo;s build something together.
-            </h2>
-            <p className="relative mx-auto mt-4 max-w-md text-sm font-medium text-parchment-300/90">
-              Currently open to new opportunities. Have a role in mind or just
-              want to say hello? I&rsquo;d love to hear from you.
-            </p>
+            <div className="relative overflow-hidden rounded-[2rem] bg-ink px-7 py-16 text-center sm:px-12">
+              <div
+                aria-hidden
+                className="absolute -bottom-24 -right-16 h-64 w-80 rounded-full blur-3xl"
+                style={{
+                  background:
+                    "radial-gradient(closest-side, rgba(139,92,246,0.45), rgba(6,182,212,0.25) 60%, transparent)",
+                }}
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-white/10"
+              />
+              <h2 className="relative font-fraunces text-3xl font-medium tracking-tight text-parchment-50 sm:text-4xl">
+                Let&rsquo;s build something together.
+              </h2>
+              <p className="relative mx-auto mt-4 max-w-md text-sm font-medium text-parchment-300/90">
+                Currently open to new opportunities. Have a role in mind or just
+                want to say hello? I&rsquo;d love to hear from you.
+              </p>
 
-            <div className="relative mt-8 flex justify-center">
-              <Link
-                href={"mailto:" + user.basics.email}
-                className="rounded-full bg-parchment-50 px-7 py-3 text-sm font-semibold text-ink transition duration-300 hover:shadow-[0_0_30px_-4px_rgba(139,92,246,0.7)]"
-              >
-                Say hello
-              </Link>
-            </div>
-
-            <div className="relative mt-9 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href={"mailto:" + user.basics.email}
-                target="_blank"
-                aria-label="Email"
-                className={cn(
-                  "flex size-11 items-center justify-center rounded-full bg-white/10 text-parchment-50 ring-1 ring-inset ring-white/15 transition hover:bg-white/20"
-                )}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="size-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
-                  />
-                </svg>
-              </Link>
-              {user.basics.profiles.map(
-                (profile) =>
-                  profile.url && (
-                    <Link
-                      href={externalHref(profile.url)}
-                      target="_blank"
-                      aria-label={profile.network}
-                      key={profile.network}
-                      className="flex size-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-inset ring-white/15 transition hover:bg-white/20"
-                    >
-                      <img
-                        src={
-                          socialMediaImages[profile.network] ||
-                          faviconUrl(profile.url) ||
-                          socialMediaImages.default
-                        }
-                        alt={`${profile.network} icon`}
-                        className="size-5 brightness-0 invert"
-                      />
-                    </Link>
-                  )
-              )}
-            </div>
-          </div>
-          </Reveal>
-        </section>
-      </main>
-
-      {/* ---------------- Footer (public portfolio only, hidden in editor preview) ---------------- */}
-      {!preview && (
-      <footer className="relative border-t border-ink/10 bg-parchment-50/40">
-        <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8">
-          {/* AuraCV call-to-action */}
-          <div className="flex flex-col items-center gap-3 rounded-[1.75rem] border border-ink/10 bg-white/60 px-6 py-9 text-center shadow-[0_18px_50px_-30px_rgba(33,27,18,0.45)] backdrop-blur">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-aura-violet/20 bg-gradient-to-r from-aura-violet/10 to-aura-cyan/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-aura-gradient">
-              Made with AuraCV
-            </span>
-            <p className="font-fraunces text-2xl font-medium tracking-tight text-ink">
-              Like what you see?
-            </p>
-            <p className="max-w-md text-sm leading-relaxed text-ink-soft">
-              Turn your resume into a beautiful, shareable portfolio like this
-              one — in minutes, no design skills needed.
-            </p>
-            <Link
-              href="https://auracv.me"
-              target="_blank"
-              className="group mt-2 inline-flex items-center gap-1.5 rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-parchment-50 transition duration-300 hover:shadow-[0_0_28px_-6px_var(--accent-glow)]"
-            >
-              Create your portfolio
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-                />
-              </svg>
-            </Link>
-          </div>
-
-          {/* Quick nav + socials */}
-          <div className="mt-10 flex flex-col items-center gap-6 sm:flex-row sm:justify-between">
-            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-semibold text-ink-mute">
-              {navLinks.map((link) => (
+              <div className="relative mt-8 flex justify-center">
                 <Link
-                  key={link.href}
-                  href={link.href}
-                  className="transition hover:text-ink"
+                  href={"mailto:" + user.basics.email}
+                  className="rounded-full bg-parchment-50 px-7 py-3 text-sm font-semibold text-ink transition duration-300 hover:shadow-[0_0_30px_-4px_rgba(139,92,246,0.7)]"
                 >
-                  {link.label}
+                  Say hello
                 </Link>
-              ))}
-            </nav>
-            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:justify-end">
-              {user.basics.email && (
-                <a
-                  href={`mailto:${user.basics.email}`}
+              </div>
+
+              <div className="relative mt-9 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href={"mailto:" + user.basics.email}
+                  target="_blank"
                   aria-label="Email"
-                  className="flex size-9 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-mute transition hover:-translate-y-0.5 hover:border-ink/25 hover:text-ink"
+                  className={cn(
+                    "flex size-11 items-center justify-center rounded-full bg-white/10 text-parchment-50 ring-1 ring-inset ring-white/15 transition hover:bg-white/20",
+                  )}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
-                    strokeWidth={1.6}
+                    strokeWidth={1.5}
                     stroke="currentColor"
-                    className="size-4"
+                    className="size-5"
                   >
                     <path
                       strokeLinecap="round"
@@ -747,69 +647,171 @@ export default function Page({
                       d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
                     />
                   </svg>
-                </a>
-              )}
-              {user.basics.profiles.map(
-                (profile) =>
-                  profile.url && (
-                    <Link
-                      key={profile.network}
-                      href={externalHref(profile.url)}
-                      target="_blank"
-                      aria-label={profile.network}
-                      className="flex size-9 items-center justify-center rounded-full border border-ink/10 bg-white transition hover:-translate-y-0.5 hover:border-ink/25"
-                    >
-                      <img
-                        src={
-                          socialMediaImages[profile.network] ||
-                          faviconUrl(profile.url) ||
-                          socialMediaImages.default
-                        }
-                        alt={`${profile.network} icon`}
-                        className="size-4 object-contain opacity-70"
-                      />
-                    </Link>
-                  )
-              )}
+                </Link>
+                {user.basics.profiles.map(
+                  (profile) =>
+                    profile.url && (
+                      <Link
+                        href={externalHref(profile.url)}
+                        target="_blank"
+                        aria-label={profile.network}
+                        key={profile.network}
+                        className="flex size-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-inset ring-white/15 transition hover:bg-white/20"
+                      >
+                        <img
+                          src={
+                            socialMediaImages[profile.network] ||
+                            faviconUrl(profile.url) ||
+                            socialMediaImages.default
+                          }
+                          alt={`${profile.network} icon`}
+                          className="size-5 brightness-0 invert"
+                        />
+                      </Link>
+                    ),
+                )}
+              </div>
             </div>
-          </div>
+          </Reveal>
+        </section>
+      </main>
 
-          {/* Bottom bar */}
-          <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-ink/10 pt-6 sm:flex-row">
-            <p className="text-xs font-medium text-ink-mute">
-              Built with{" "}
+      {/* ---------------- Footer (public portfolio only, hidden in editor preview) --------------- */}
+      {!preview && (
+        <footer className="relative border-t border-ink/10 bg-parchment-50/40">
+          <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8">
+            {/* AuraCV call-to-action */}
+            <div className="flex flex-col items-center gap-3 rounded-[1.75rem] border border-ink/10 bg-white/60 px-6 py-9 text-center shadow-[0_18px_50px_-30px_rgba(33,27,18,0.45)] backdrop-blur">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-aura-violet/20 bg-gradient-to-r from-aura-violet/10 to-aura-cyan/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-aura-gradient">
+                Made with AuraCV
+              </span>
+              <p className="font-fraunces text-2xl font-medium tracking-tight text-ink">
+                Like what you see?
+              </p>
+              <p className="max-w-md text-sm leading-relaxed text-ink-soft">
+                Turn your resume into a beautiful, shareable portfolio like this
+                one — in minutes, no design skills needed.
+              </p>
               <Link
                 href="https://auracv.me"
                 target="_blank"
-                className="font-semibold text-aura-gradient"
+                className="group mt-2 inline-flex items-center gap-1.5 rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-parchment-50 transition duration-300 hover:shadow-[0_0_28px_-6px_var(--accent-glow)]"
               >
-                AuraCV
-              </Link>{" "}
-              · © {new Date().getFullYear()}
-            </p>
-            <a
-              href="#about"
-              className="group inline-flex items-center gap-1 text-xs font-semibold text-ink-mute transition hover:text-ink"
-            >
-              Back to top
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="size-3.5 transition-transform duration-300 group-hover:-translate-y-0.5"
+                Create your portfolio
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+                  />
+                </svg>
+              </Link>
+            </div>
+
+            {/* Quick nav + socials */}
+            <div className="mt-10 flex flex-col items-center gap-6 sm:flex-row sm:justify-between">
+              <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-semibold text-ink-mute">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="transition hover:text-ink"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+              <div className="flex flex-wrap items-center justify-center gap-2.5 sm:justify-end">
+                {user.basics.email && (
+                  <a
+                    href={`mailto:${user.basics.email}`}
+                    aria-label="Email"
+                    className="flex size-9 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-mute transition hover:-translate-y-0.5 hover:border-ink/25 hover:text-ink"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.6}
+                      stroke="currentColor"
+                      className="size-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+                      />
+                    </svg>
+                  </a>
+                )}
+                {user.basics.profiles.map(
+                  (profile) =>
+                    profile.url && (
+                      <Link
+                        key={profile.network}
+                        href={externalHref(profile.url)}
+                        target="_blank"
+                        aria-label={profile.network}
+                        className="flex size-9 items-center justify-center rounded-full border border-ink/10 bg-white transition hover:-translate-y-0.5 hover:border-ink/25"
+                      >
+                        <img
+                          src={
+                            socialMediaImages[profile.network] ||
+                            faviconUrl(profile.url) ||
+                            socialMediaImages.default
+                          }
+                          alt={`${profile.network} icon`}
+                          className="size-4 object-contain opacity-70"
+                        />
+                      </Link>
+                    ),
+                )}
+              </div>
+            </div>
+
+            {/* Bottom bar */}
+            <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-ink/10 pt-6 sm:flex-row">
+              <p className="text-xs font-medium text-ink-mute">
+                Built with{" "}
+                <Link
+                  href="https://auracv.me"
+                  target="_blank"
+                  className="font-semibold text-aura-gradient"
+                >
+                  AuraCV
+                </Link>{" "}
+                · © {new Date().getFullYear()}
+              </p>
+              <a
+                href="#about"
+                className="group inline-flex items-center gap-1 text-xs font-semibold text-ink-mute transition hover:text-ink"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m4.5 15.75 7.5-7.5 7.5 7.5"
-                />
-              </svg>
-            </a>
+                Back to top
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="size-3.5 transition-transform duration-300 group-hover:-translate-y-0.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m4.5 15.75 7.5-7.5 7.5 7.5"
+                  />
+                </svg>
+              </a>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
       )}
     </div>
   );
