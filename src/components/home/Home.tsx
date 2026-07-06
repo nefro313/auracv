@@ -264,6 +264,10 @@ export default function Home() {
         .from("auracv")
         .upload(filename, compressedFile, {
           upsert: true,
+          // Cache aggressively — filenames are unique per upload, so a long TTL
+          // lets the browser serve images instantly on repeat views instead of
+          // re-fetching and flashing a placeholder each time.
+          cacheControl: "31536000",
         });
 
       if (error) {
@@ -280,6 +284,83 @@ export default function Home() {
     } catch (error) {
       console.error("Error in uploadImageAndGetUrl:", error);
       return null;
+    }
+  };
+
+  // Write a photo/logo URL into the right slice of `user` for a given section.
+  // Shared by the optimistic local preview and the final uploaded URL so both
+  // paths stay in sync.
+  const setPhotoField = (type: PhotoTypes, index: number, url: string) => {
+    switch (type) {
+      case "profilePhoto":
+        setUser((prevUser) => ({
+          ...prevUser,
+          basics: { ...prevUser.basics, avatarUrl: url },
+          meta: { ...prevUser.meta, avatarUrl: url },
+        }));
+        setUserMetaData((prevUserMetaData: UserMetaData) => ({
+          ...prevUserMetaData,
+          avatarUrl: url,
+        }));
+        break;
+      case "workExperienceLogo":
+        setUser((prevUser) => ({
+          ...prevUser,
+          work: prevUser.work.map((exp, idx) =>
+            idx === index ? { ...exp, logo: url } : exp,
+          ),
+        }));
+        break;
+      case "educationLogo":
+        setUser((prevUser) => ({
+          ...prevUser,
+          education: prevUser.education.map((edu, idx) =>
+            idx === index ? { ...edu, logo: url } : edu,
+          ),
+        }));
+        break;
+      case "projectImage":
+        setUser((prevUser) => ({
+          ...prevUser,
+          projects: {
+            ...prevUser.projects,
+            projects: prevUser.projects.projects.map((proj, idx) =>
+              idx === index ? { ...proj, image: url } : proj,
+            ),
+          },
+        }));
+        break;
+      case "hackathonLogo":
+        setUser((prevUser) => ({
+          ...prevUser,
+          hackathons: {
+            ...prevUser.hackathons,
+            hackathons: prevUser.hackathons.hackathons.map((hack, idx) =>
+              idx === index ? { ...hack, image: url } : hack,
+            ),
+          },
+        }));
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Current photo URL for a section slot, so a failed upload can restore it.
+  const getPhotoField = (type: PhotoTypes, index: number): string => {
+    switch (type) {
+      case "profilePhoto":
+        return user.meta.avatarUrl || "";
+      case "workExperienceLogo":
+        return user.work[index]?.logo || "";
+      case "educationLogo":
+        return user.education[index]?.logo || "";
+      case "projectImage":
+        return user.projects.projects[index]?.image || "";
+      case "hackathonLogo":
+        return user.hackathons.hackathons[index]?.image || "";
+      default:
+        return "";
     }
   };
 
@@ -301,6 +382,14 @@ export default function Home() {
     const randomNumber = Math.floor(Math.random() * 900) + 100;
     const path = `user/${userData?.user.id}/${type}_${randomNumber}`;
 
+    // Show the selected image immediately from a local object URL so the user
+    // sees their photo right away instead of a placeholder/filename while the
+    // upload round-trips to storage. Remember the previous value to restore on
+    // failure.
+    const previousUrl = getPhotoField(type, index);
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoField(type, index, previewUrl);
+
     // Set the upload status to uploading
     setUploadStatus((prevStatus) => ({
       ...prevStatus,
@@ -311,59 +400,10 @@ export default function Home() {
     if (fileUrl) {
       console.log("File uploaded successfully:", fileUrl);
       markAsEdited();
-      switch (type) {
-        case "profilePhoto":
-          setUser((prevUser) => ({
-            ...prevUser,
-            basics: { ...prevUser.basics, avatarUrl: fileUrl },
-            meta: { ...prevUser.meta, avatarUrl: fileUrl },
-          }));
-          setUserMetaData((prevUserMetaData: UserMetaData) => ({
-            ...prevUserMetaData,
-            avatarUrl: fileUrl,
-          }));
-          break;
-        case "workExperienceLogo":
-          setUser((prevUser) => ({
-            ...prevUser,
-            work: prevUser.work.map((exp, idx) =>
-              idx === index ? { ...exp, logo: fileUrl } : exp,
-            ),
-          }));
-          break;
-        case "educationLogo":
-          setUser((prevUser) => ({
-            ...prevUser,
-            education: prevUser.education.map((edu, idx) =>
-              idx === index ? { ...edu, logo: fileUrl } : edu,
-            ),
-          }));
-          break;
-        case "projectImage":
-          setUser((prevUser) => ({
-            ...prevUser,
-            projects: {
-              ...prevUser.projects,
-              projects: prevUser.projects.projects.map((proj, idx) =>
-                idx === index ? { ...proj, image: fileUrl } : proj,
-              ),
-            },
-          }));
-          break;
-        case "hackathonLogo":
-          setUser((prevUser) => ({
-            ...prevUser,
-            hackathons: {
-              ...prevUser.hackathons,
-              hackathons: prevUser.hackathons.hackathons.map((hack, idx) =>
-                idx === index ? { ...hack, image: fileUrl } : hack,
-              ),
-            },
-          }));
-          break;
-        default:
-          break;
-      }
+      // Swap the temporary preview for the persisted storage URL, then release
+      // the object URL now that it's no longer referenced.
+      setPhotoField(type, index, fileUrl);
+      URL.revokeObjectURL(previewUrl);
 
       // Set the upload status to uploaded
       setUploadStatus((prevStatus) => ({
@@ -379,8 +419,10 @@ export default function Home() {
         }));
       }, 2000);
     } else {
-      // Handle upload failure
+      // Handle upload failure — restore the previous image and drop the preview.
       console.error("File upload failed");
+      setPhotoField(type, index, previousUrl);
+      URL.revokeObjectURL(previewUrl);
 
       // Reset the upload status to idle
       setUploadStatus((prevStatus) => ({

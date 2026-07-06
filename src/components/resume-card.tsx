@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { Badge } from "@/components/ui/badge";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
@@ -33,16 +33,14 @@ export const ResumeCard = ({
       <article className="glass-card rounded-3xl p-5 transition duration-300 hover:-translate-y-1 hover:bg-white/80 sm:p-6">
         {/* Header: logo · company / role · period */}
         <div className="flex items-start gap-4">
-          <Avatar className="size-12 shrink-0 overflow-hidden rounded-2xl">
-            <AvatarImage
-              src={logoUrl}
-              alt={altText}
-              className="rounded-2xl object-contain"
-            />
-            <AvatarFallback className="glass-tile rounded-2xl font-fraunces text-lg font-medium text-ink">
-              {altText[0]}
-            </AvatarFallback>
-          </Avatar>
+          <ImageWithFallback
+            src={logoUrl}
+            alt={altText}
+            fallback={altText[0]}
+            wrapperClassName="size-12 shrink-0 rounded-2xl"
+            imgClassName="rounded-2xl object-contain"
+            fallbackClassName="glass-tile rounded-2xl font-fraunces text-lg font-medium text-ink"
+          />
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">

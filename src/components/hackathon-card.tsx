@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import Link from "next/link";
 import { HackathonDetail } from "@/lib/type";
 
@@ -14,16 +14,14 @@ export function HackathonCard({
   return (
     <li className="relative ml-10 py-6">
       <div className="absolute -left-[3.65rem] top-6 flex items-center justify-center rounded-2xl bg-parchment-100 p-0.5">
-        <Avatar className="size-12 overflow-hidden rounded-2xl">
-          <AvatarImage
-            src={image}
-            alt={title}
-            className="rounded-2xl object-contain"
-          />
-          <AvatarFallback className="glass-tile rounded-2xl font-fraunces text-lg font-medium text-ink">
-            {title[0]}
-          </AvatarFallback>
-        </Avatar>
+        <ImageWithFallback
+          src={image}
+          alt={title}
+          fallback={title[0]}
+          wrapperClassName="size-12 rounded-2xl"
+          imgClassName="rounded-2xl object-contain"
+          fallbackClassName="glass-tile rounded-2xl font-fraunces text-lg font-medium text-ink"
+        />
       </div>
 
       <div className="flex flex-1 flex-col justify-start gap-1">

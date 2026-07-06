@@ -3,7 +3,7 @@ import { HackathonCard } from "@/components/hackathon-card";
 import { ProjectCard } from "@/components/project-card";
 import { ResumeCard } from "@/components/resume-card";
 import { EducationCard } from "@/components/education-card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { tailwindColors, externalHref, faviconUrl } from "@/lib/utils";
@@ -279,22 +279,23 @@ export default function Page({
           id="about"
           className="animate-fade-up flex scroll-mt-24 flex-col items-center text-center"
         >
-          <Avatar className="size-24 border border-ink/10 shadow-[0_18px_50px_-22px_rgba(33,27,18,0.5)] ring-4 ring-white">
-            <AvatarImage
-              className="h-full w-full object-cover object-top"
-              alt={user.basics.name}
-              src={user.meta.avatarUrl}
-            />
-            <AvatarFallback
-              style={{
-                backgroundImage:
-                  "linear-gradient(135deg, var(--accent), var(--accent-soft))",
-              }}
-              className="font-fraunces text-4xl font-medium text-white"
-            >
-              {user.basics.name.trim().charAt(0).toUpperCase() || "A"}
-            </AvatarFallback>
-          </Avatar>
+          <ImageWithFallback
+            src={user.meta.avatarUrl}
+            alt={user.basics.name}
+            wrapperClassName="size-24 rounded-full border border-ink/10 shadow-[0_18px_50px_-22px_rgba(33,27,18,0.5)] ring-4 ring-white"
+            imgClassName="rounded-full object-cover object-top"
+            fallback={
+              <span
+                style={{
+                  backgroundImage:
+                    "linear-gradient(135deg, var(--accent), var(--accent-soft))",
+                }}
+                className="flex h-full w-full items-center justify-center font-fraunces text-4xl font-medium text-white"
+              >
+                {user.basics.name.trim().charAt(0).toUpperCase() || "A"}
+              </span>
+            }
+          />
 
           <h1 className="mt-6 font-fraunces text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl">
             {user.basics.name}

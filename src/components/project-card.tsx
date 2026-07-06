@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Markdown from "react-markdown";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { ProjectDetail } from "@/lib/type";
 import { externalHref } from "@/lib/utils";
 
@@ -17,19 +18,14 @@ export function ProjectCard({
     <article className="glass-card group flex h-full flex-col rounded-3xl p-5 font-outfit transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white/80 sm:p-6">
       {/* Header: glass tile (image or monogram) · title · duration */}
       <div className="flex items-center gap-4">
-        <div className="glass-tile flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl">
-          {image ? (
-            <img
-              src={image}
-              alt={title}
-              className="h-full w-full object-cover object-top"
-            />
-          ) : (
-            <span className="font-fraunces text-lg font-medium text-ink">
-              {title?.[0] ?? "•"}
-            </span>
-          )}
-        </div>
+        <ImageWithFallback
+          src={image}
+          alt={title}
+          fallback={title?.[0] ?? "•"}
+          wrapperClassName="glass-tile size-12 shrink-0 rounded-2xl"
+          imgClassName="object-cover object-top"
+          fallbackClassName="font-fraunces text-lg font-medium text-ink"
+        />
 
         <h3 className="min-w-0 flex-1 font-fraunces text-lg font-semibold leading-snug tracking-tight text-ink">
           {title}
