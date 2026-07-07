@@ -3,7 +3,7 @@
 import { Chip, Input, Kbd, Spinner, Switch, Textarea } from "@nextui-org/react";
 import { ChangeEvent } from "react";
 import { UserMetaData } from "@/lib/type";
-import { tailwindColors } from "@/lib/utils";
+import { cn, tailwindColors } from "@/lib/utils";
 import { ACCEPTED_IMAGE_INPUT } from "../constants";
 import { useEditor } from "../EditorContext";
 
@@ -16,6 +16,8 @@ export default function GeneralInfoSection() {
     inputValue,
     slugError,
     setSlugError,
+    fieldErrors,
+    setFieldErrors,
     isChecking,
     isAvailable,
     setIsAvailable,
@@ -29,6 +31,19 @@ export default function GeneralInfoSection() {
     handleSkillInputKeyDown,
     markAsEdited,
   } = useEditor();
+
+  // A required field is flagged red until the user starts typing into it.
+  const clearFieldError = (key: string) =>
+    setFieldErrors((prev) => (prev[key] ? { ...prev, [key]: false } : prev));
+
+  // Shared inputWrapper classes; when a required field is missing we override
+  // the border/background to red so it's clear which field needs filling.
+  const wrapperClass = (key: string) =>
+    cn(
+      "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+      fieldErrors[key] &&
+        "!border-red-500 !bg-red-50 data-[hover=true]:!border-red-500 group-data-[focus=true]:!border-red-500",
+    );
 
   return (
           <div
@@ -134,14 +149,17 @@ export default function GeneralInfoSection() {
                 variant="bordered"
                 placeholder="e.g. Ada Lovelace"
                 value={user.basics.name}
-                onChange={(e) =>
-                  handleInputChange("basics.name", -1, "", e.target.value)
-                }
+                onChange={(e) => {
+                  clearFieldError("basics.name");
+                  handleInputChange("basics.name", -1, "", e.target.value);
+                }}
                 name="basics.name"
+                isInvalid={!!fieldErrors["basics.name"]}
+                errorMessage="Full name is required"
                 className="max-w-xs text-ink-soft"
                 classNames={{
-                  inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                  inputWrapper: wrapperClass("basics.name"),
+                  errorMessage: "!text-red-600 font-medium",
                 }}
               />
             </div>{" "}
@@ -155,6 +173,7 @@ export default function GeneralInfoSection() {
                 onChange={(e) => {
                   // Clear any stale availability state while the user edits.
                   setSlugError(false);
+                  clearFieldError("meta.userName");
                   setIsAvailable(false);
                   setUserMetaData((prevUserMetaData: UserMetaData) => ({
                     ...prevUserMetaData,
@@ -168,13 +187,19 @@ export default function GeneralInfoSection() {
                   );
                 }}
                 name="userName"
-                isInvalid={slugError}
-                errorMessage={errorMessage}
+                isInvalid={slugError || !!fieldErrors["meta.userName"]}
+                errorMessage={
+                  slugError ? errorMessage : "User name is required"
+                }
                 onBlur={handleBlur}
                 className="max-w-xs flex  text-ink-soft"
                 classNames={{
-                  inputWrapper:
+                  inputWrapper: cn(
                     "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                    (slugError || fieldErrors["meta.userName"]) &&
+                      "!border-red-500 !bg-red-50 data-[hover=true]:!border-red-500 group-data-[focus=true]:!border-red-500",
+                  ),
+                  errorMessage: "!text-red-600 font-medium",
                 }}
                 endContent={
                   <div className="pointer-events-none pl-2 w-full  gap-7 flex items-between">
@@ -214,14 +239,17 @@ export default function GeneralInfoSection() {
                 variant="bordered"
                 placeholder="e.g. Product Designer"
                 value={user.basics.label}
-                onChange={(e) =>
-                  handleInputChange("basics.label", -1, "", e.target.value)
-                }
+                onChange={(e) => {
+                  clearFieldError("basics.label");
+                  handleInputChange("basics.label", -1, "", e.target.value);
+                }}
                 name="role"
+                isInvalid={!!fieldErrors["basics.label"]}
+                errorMessage="Your role is required"
                 className="max-w-xs text-ink-soft"
                 classNames={{
-                  inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                  inputWrapper: wrapperClass("basics.label"),
+                  errorMessage: "!text-red-600 font-medium",
                 }}
               />
             </div>
@@ -320,14 +348,17 @@ export default function GeneralInfoSection() {
                 variant="bordered"
                 placeholder="you@example.com"
                 value={user.basics.email}
-                onChange={(e) =>
-                  handleInputChange("basics.email", -1, "", e.target.value)
-                }
+                onChange={(e) => {
+                  clearFieldError("basics.email");
+                  handleInputChange("basics.email", -1, "", e.target.value);
+                }}
                 name="email"
+                isInvalid={!!fieldErrors["basics.email"]}
+                errorMessage="Contact email is required"
                 className="max-w-xs text-ink-soft"
                 classNames={{
-                  inputWrapper:
-                    "border-1 border-ink/15 bg-white shadow-none data-[hover=true]:border-ink/30 group-data-[focus=true]:border-aura-violet",
+                  inputWrapper: wrapperClass("basics.email"),
+                  errorMessage: "!text-red-600 font-medium",
                 }}
               />
             </div>
