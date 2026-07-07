@@ -1,4 +1,4 @@
-import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
@@ -28,7 +28,7 @@ export const EducationCard = ({
   return (
     <Link href={href || "#"} className="group block">
       <div className="glass-card flex gap-4 rounded-3xl p-5 transition duration-300 hover:-translate-y-1 hover:bg-white/75">
-        <ImageWithFallback
+        <ImageWithSkeleton
           src={logoUrl}
           alt={altText}
           fallback={altText[0]}

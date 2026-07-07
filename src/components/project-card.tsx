@@ -3,6 +3,7 @@ import Markdown from "react-markdown";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { ProjectDetail } from "@/lib/type";
 import { externalHref } from "@/lib/utils";
+import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 
 export function ProjectCard({
   title,
@@ -18,7 +19,7 @@ export function ProjectCard({
     <article className="glass-card group flex h-full flex-col rounded-3xl p-5 font-outfit transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white/80 sm:p-6">
       {/* Header: glass tile (image or monogram) · title · duration */}
       <div className="flex items-center gap-4">
-        <ImageWithFallback
+        <ImageWithSkeleton
           src={image}
           alt={title}
           fallback={title?.[0] ?? "•"}

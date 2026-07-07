@@ -3,7 +3,7 @@ import { HackathonCard } from "@/components/hackathon-card";
 import { ProjectCard } from "@/components/project-card";
 import { ResumeCard } from "@/components/resume-card";
 import { EducationCard } from "@/components/education-card";
-import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { tailwindColors, externalHref, faviconUrl } from "@/lib/utils";
@@ -64,12 +64,20 @@ export default function Page({
     (c) => c.name === user.meta.portfolioColor,
   )?.value;
   const accentHex =
-    picked && picked.toLowerCase() !== "#fff" && picked.toLowerCase() !== "#ffffff"
+    picked &&
+    picked.toLowerCase() !== "#fff" &&
+    picked.toLowerCase() !== "#ffffff"
       ? picked
       : DEFAULT_ACCENT;
   const hexToRgb = (hex: string) => {
     const h = hex.replace("#", "");
-    const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+    const full =
+      h.length === 3
+        ? h
+            .split("")
+            .map((c) => c + c)
+            .join("")
+        : h;
     const n = parseInt(full, 16);
     return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
   };
@@ -91,8 +99,7 @@ export default function Page({
 
   const hasWork = user.work.length > 0 && user.work[0].name !== "";
   const hasProjects =
-    user.projects.projects.length > 0 &&
-    user.projects.projects[0].title !== "";
+    user.projects.projects.length > 0 && user.projects.projects[0].title !== "";
   const hasEducation =
     user.education.length > 0 && user.education[0].institution !== "";
 
@@ -279,7 +286,7 @@ export default function Page({
           id="about"
           className="animate-fade-up flex scroll-mt-24 flex-col items-center text-center"
         >
-          <ImageWithFallback
+          <ImageWithSkeleton
             src={user.meta.avatarUrl}
             alt={user.basics.name}
             wrapperClassName="size-24 rounded-full border border-ink/10 shadow-[0_18px_50px_-22px_rgba(33,27,18,0.5)] ring-4 ring-white"
