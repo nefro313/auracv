@@ -38,6 +38,12 @@ import ResumeTemplate from "@/components/design/resume_template";
 import { validateImageFile } from "./editor/constants";
 import { useUndoableState } from "./editor/useUndoableState";
 import {
+  StudioDraft,
+  clearDraft,
+  loadDraft,
+  saveDraft,
+} from "./editor/draftStorage";
+import {
   EditorContextValue,
   EditorProvider,
 } from "./editor/EditorContext";
@@ -106,6 +112,10 @@ export default function Home() {
   const [initialUser, setInitialUser] = useState<UserProfile>(initialUserState);
   const [isLoading, setIsLoading] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false); // Track unsaved changes
+  // An autosaved draft recovered on load that differs from the server copy. The
+  // editor shows the saved (server) version until the user chooses in the prompt
+  // whether to restore or discard it; non-null means the prompt is open.
+  const [pendingDraft, setPendingDraft] = useState<StudioDraft | null>(null);
   const [slugError, setSlugError] = useState(false);
   // Required General-Info fields that failed validation on the last save
   // attempt — keyed by the `user` path so the section can turn them red.
@@ -120,6 +130,25 @@ export default function Home() {
   const router = useRouter();
   const { notify, viewport: notificationViewport } = useNotifications();
 
+  // Apply the recovered draft over the loaded server copy. Restoring via setUser
+  // pushes a single undo step, so one Cmd+Z returns to the saved baseline.
+  const handleRestoreDraft = useCallback(() => {
+    setPendingDraft((draft) => {
+      if (!draft) return null;
+      setUser(draft.resumeJson);
+      if (draft.metaJson) setUserMetaData(draft.metaJson);
+      setHasUnsavedChanges(true);
+      return null;
+    });
+  }, [setUser]);
+
+  // Keep the server version and drop the local draft.
+  const handleDiscardDraft = useCallback(() => {
+    const userId = userData?.user?.id;
+    if (userId) clearDraft(userId);
+    setPendingDraft(null);
+  }, [userData]);
+
   useEffect(() => {
     const fetchUserData = async () => {
       const { data, error } = await supabase
@@ -132,11 +161,33 @@ export default function Home() {
         console.error("Error fetching user data:", error);
       } else {
         if (data && data.length > 0) {
-          setUserMetaData(data[0].metaJson);
+          const serverResume: UserProfile = JSON.parse(
+            JSON.stringify(data[0].resumeJson),
+          );
+          const serverMeta: UserMetaData = data[0].metaJson;
+
+          setUserMetaData(serverMeta);
           setGithubData(data[0].githubWrap);
           // Loaded profile is the history baseline — no undo into empty state.
-          resetUserHistory(JSON.parse(JSON.stringify(data[0].resumeJson)));
-          setInitialUser(JSON.parse(JSON.stringify(data[0].resumeJson))); // Deep clone
+          resetUserHistory(serverResume);
+          setInitialUser(JSON.parse(JSON.stringify(serverResume))); // Deep clone
+
+          // Recover unsaved edits from a previous session (reload/crash). Only
+          // prompt when the draft actually differs from what's on the server, so
+          // an up-to-date user isn't nagged. The editor shows the server copy
+          // until the user picks restore/discard in the prompt.
+          const draft = loadDraft(userData.user.id);
+          if (draft) {
+            if (
+              JSON.stringify(draft.resumeJson) !== JSON.stringify(serverResume)
+            ) {
+              setPendingDraft(draft);
+            } else {
+              // Draft matches the server — nothing to recover, tidy it away.
+              clearDraft(userData.user.id);
+            }
+          }
+
           setIsLoading(false);
         }
       }
@@ -145,6 +196,23 @@ export default function Home() {
       fetchUserData();
     }
   }, [userData]);
+
+  // Autosave the in-progress edit to localStorage so a reload or crash doesn't
+  // lose unsaved work. Debounced; the draft is cleared on Save and on Discard.
+  useEffect(() => {
+    const userId = userData?.user?.id;
+    if (isLoading || !userId || !hasUnsavedChanges) return;
+
+    const timer = setTimeout(() => {
+      saveDraft(userId, {
+        resumeJson: user,
+        metaJson: userMetaData,
+        savedAt: new Date().toISOString(),
+      });
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [user, userMetaData, hasUnsavedChanges, isLoading, userData]);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -1071,6 +1139,9 @@ export default function Home() {
         // Saved state becomes the new history baseline.
         resetUserHistory(repairedUser);
         setInitialUser(JSON.parse(JSON.stringify(repairedUser)));
+        // The server copy is now current — drop the local draft so it can't be
+        // re-restored on the next reload.
+        if (userData?.user?.id) clearDraft(userData.user.id);
         notify({
           variant: "success",
           title: "Changes saved successfully!",
@@ -1272,6 +1343,67 @@ export default function Home() {
     <EditorProvider value={editorValue}>
       <div className="grid grid-cols-5 font-outfit w-full h-full overflow-hidden bg-parchment-100 text-ink">
         {notificationViewport}
+
+        {/* ---------- Recover unsaved changes prompt ---------- */}
+        {pendingDraft && (
+          <div
+            className="fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="restore-draft-title"
+          >
+            {/* Non-dismissing backdrop — the user must explicitly choose so
+                recovered work is never lost by an accidental outside click. */}
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-ink/40 backdrop-blur-sm"
+            />
+            <div className="animate-fade-up relative z-10 w-full max-w-md rounded-3xl border border-ink/10 bg-parchment-50 p-7 shadow-2xl">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-aura-violet/10 text-aura-violet">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.6}
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
+                  />
+                </svg>
+              </div>
+              <h2
+                id="restore-draft-title"
+                className="mt-4 font-fraunces text-2xl font-medium tracking-tight text-ink"
+              >
+                Recover unsaved changes?
+              </h2>
+              <p className="mt-2 text-sm font-medium text-ink-soft">
+                We found edits you made last time that were never saved. Would
+                you like to restore them, or start from your last saved version?
+              </p>
+
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  onClick={handleDiscardDraft}
+                  className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-white/70 px-5 py-2.5 text-sm font-semibold text-ink-soft transition hover:border-ink/25 hover:text-ink"
+                >
+                  Discard
+                </button>
+                <button
+                  onClick={handleRestoreDraft}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-parchment-50 transition hover:shadow-[0_0_28px_-6px_rgba(139,92,246,0.65)]"
+                >
+                  Restore changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="col-span-1 hidden lg:block border-r border-ink/10 h-full overflow-y-auto px-8 py-12">
           <div>
             <p className="mb-6 pl-1 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-ink-mute">
