@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Download, FileText, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Download, FileText, Loader2 } from "lucide-react";
 import { UserProfile } from "@/lib/type";
 
 /**
@@ -40,8 +41,17 @@ export default function ResumeActions({ profile }: { profile: UserProfile }) {
   };
 
   return (
-    <div className="mb-5 flex w-full flex-col items-stretch gap-3 print:hidden sm:flex-row sm:items-center sm:justify-end">
-      <p className="text-center text-xs font-medium text-ink-mute sm:mr-auto sm:text-left">
+    <div className="mb-5 flex w-full flex-col items-stretch gap-3 print:hidden sm:flex-row sm:items-center sm:justify-between">
+      {/* Back to the portfolio — the subdomain root. */}
+      <Link
+        href="/"
+        className="group inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 bg-white/70 px-5 py-2.5 text-sm font-semibold text-ink-soft transition duration-300 hover:border-ink/25 hover:text-ink"
+      >
+        <ArrowLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
+        Portfolio
+      </Link>
+
+      <p className="text-center text-xs font-medium text-ink-mute sm:text-left">
         Download a copy — PDF opens your print dialog, choose{" "}
         <span className="font-semibold text-ink-soft">Save as PDF</span>.
       </p>

@@ -2,38 +2,9 @@ import Hero from "@/components/landingpage/Hero";
 import Temp_1 from "@/components/design/temp_1";
 import { headers } from "next/headers";
 import { UserProfile } from "@/lib/type";
+import { getPublicProfile } from "@/lib/public-profile";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const LANDING_PAGES = ["www", "auracv", "localhost:3000"] as const;
-
-async function getUser(username: string): Promise<any | null> {
-  if (!username) return null;
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/getUser`, {
-      cache: "no-cache",
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username }),
-    });
-
-    if (!response.ok) {
-      console.error(`HTTP error! Status: ${response.status}`);
-      return null;
-    }
-
-    const { data, githubData, error } = await response.json();
-    if (error) {
-      console.error("API error:", error);
-      return null;
-    }
-
-    return { data, githubData };
-  } catch (error) {
-    console.error("Fetch error:", error);
-    return null;
-  }
-}
 
 function generateJsonLd(user: UserProfile) {
   return {
@@ -87,16 +58,15 @@ function generateJsonLd(user: UserProfile) {
 export default async function IndexPage() {
   const headersList = await headers();
   const pathname = headersList.get("x-current-path")?.split(".")[0] || "";
-  if (LANDING_PAGES.includes(pathname as any)) {
+  if (LANDING_PAGES.includes(pathname as (typeof LANDING_PAGES)[number])) {
     return <Hero />;
   }
 
-  const result = await getUser(pathname);
+  const data = await getPublicProfile(pathname);
 
-  if (!result?.data) {
+  if (!data) {
     return <Hero />;
   }
-  const { data } = result;
   const jsonLd = generateJsonLd(data);
 
   return (
