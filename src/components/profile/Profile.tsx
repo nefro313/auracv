@@ -6,7 +6,12 @@ import { useRouter } from "next/navigation";
 import { useCommonContext } from "@/Common_context";
 import { supabase } from "@/utils/supabase/client";
 import { UserProfile } from "@/lib/type";
-import { profileCompleteness, skillCount } from "@/lib/utils";
+import {
+  externalHref,
+  faviconUrl,
+  profileCompleteness,
+  skillCount,
+} from "@/lib/utils";
 import { ProfileSkeleton } from "@/components/ui/skeletons";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
@@ -16,8 +21,24 @@ type Row = {
   resumeJson: UserProfile;
 };
 
-const NETWORK_INITIAL = (network: string) =>
-  (network || "·").trim().charAt(0).toUpperCase();
+// Match the built-in networks to the brand icons used by the editor's Social
+// Links section (public/icon/*). Keyed case-insensitively by network name.
+const NETWORK_ICONS: Record<string, string> = {
+  linkedin: "/icon/linkedin.png",
+  github: "/icon/github.png",
+  x: "/icon/twitter.png",
+  twitter: "/icon/twitter.png",
+  youtube: "/icon/youtube.png",
+  dribbble: "/icon/dribbble.png",
+  medium: "/icon/medium.svg",
+};
+
+/** Icon for a connected profile: a known brand icon, else the destination
+ *  site's own favicon, else a generic link glyph. */
+const networkIcon = (network: string, url: string) =>
+  NETWORK_ICONS[(network || "").trim().toLowerCase()] ||
+  faviconUrl(url) ||
+  "/icon/link.svg";
 
 export default function Profile() {
   const { userData, logout } = useCommonContext();
@@ -270,13 +291,18 @@ export default function Profile() {
                   .map((p) => (
                     <a
                       key={p.url}
-                      href={p.url}
+                      href={externalHref(p.url)}
                       target="_blank"
                       rel="noreferrer"
                       className="group inline-flex items-center gap-2 rounded-full border border-ink/10 bg-parchment-100/70 py-1.5 pl-1.5 pr-4 text-sm font-medium text-ink-soft transition hover:border-ink/20 hover:text-ink"
                     >
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink font-fraunces text-xs font-semibold text-parchment-50">
-                        {NETWORK_INITIAL(p.network)}
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white border border-ink/10">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={networkIcon(p.network, p.url)}
+                          alt={p.network || "Link"}
+                          className="h-4 w-4 object-contain"
+                        />
                       </span>
                       {p.network || p.username || "Link"}
                     </a>
