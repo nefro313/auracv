@@ -153,3 +153,48 @@ export function ProfileSkeleton() {
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* ResumeSkeleton — the published résumé page (/resume) while the      */
+/* profile streams in: actions bar + the white A4-ish sheet.           */
+/* ------------------------------------------------------------------ */
+export function ResumeSkeleton() {
+  return (
+    <div className="min-h-svh bg-parchment-200/60 py-8 font-outfit sm:py-12">
+      <div className="mx-auto w-full max-w-[820px] px-4 sm:px-6">
+        {/* actions bar: back link · download buttons */}
+        <div className="mb-5 flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Skeleton className="h-10 w-32 rounded-full" />
+          <div className="flex items-center justify-center gap-2.5">
+            <Skeleton className="h-10 w-24 rounded-full" />
+            <Skeleton className="h-10 w-24 rounded-full" />
+          </div>
+        </div>
+
+        {/* the sheet */}
+        <div className="rounded-2xl border border-ink/10 bg-white p-6 shadow-[0_24px_60px_-32px_rgba(33,27,18,0.35)] sm:p-10 md:p-12">
+          {/* centered header: name · label · contact row */}
+          <div className="flex flex-col items-center gap-3">
+            <Skeleton className="h-9 w-60 sm:w-72" />
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-4 w-11/12 max-w-md" />
+          </div>
+
+          {/* body sections: small-caps heading over text lines */}
+          <div className="mt-10 space-y-9">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i}>
+                <Skeleton className="h-5 w-36" />
+                <div className="mt-4 space-y-2.5">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-11/12" />
+                  <Skeleton className="h-4 w-4/5" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

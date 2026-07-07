@@ -55,7 +55,10 @@ export default function Page({
   /** Hide the fixed PillNav when embedded in the editor preview. */
   preview?: boolean;
 }) {
+  // An uploaded resume PDF opens in a new tab; the built-in /resume page
+  // navigates in-app so it can stream its loading skeleton instantly.
   const resumeHref = user.basics.resumeUrl || "/resume";
+  const resumeIsExternal = !!user.basics.resumeUrl;
 
   // Accent colour chosen in the editor ("Theme Color"). Falls back to the
   // house aura violet; "white" is treated as no-accent so glows stay visible.
@@ -405,7 +408,8 @@ export default function Page({
               {user.meta.buttonText || "Get in touch"}
             </Link>
             <Link
-              target="_blank"
+              target={resumeIsExternal ? "_blank" : undefined}
+              rel={resumeIsExternal ? "noopener noreferrer" : undefined}
               href={resumeHref}
               className="glass-chip rounded-full px-6 py-2.5 text-sm font-semibold text-ink transition duration-300 hover:bg-white/80"
             >

@@ -16,7 +16,8 @@ export interface PillNavProps {
   /** Initials shown when no logo image is available. */
   logoText?: string;
   items: PillNavItem[];
-  /** Trailing accent pill (e.g. a résumé download). Opens in a new tab. */
+  /** Trailing accent pill (e.g. a résumé link). External URLs open in a new
+      tab; internal paths navigate in-app so loading states stream instantly. */
   cta?: { label: string; href: string };
   activeHref?: string;
   className?: string;
@@ -278,6 +279,10 @@ const PillNav: React.FC<PillNavProps> = ({
     ["--pill-gap"]: "4px",
   } as React.CSSProperties;
 
+  // Only external cta URLs (an uploaded resume PDF) leave the site in a new
+  // tab; internal paths like /resume use client-side navigation.
+  const ctaIsExternal = !!cta && /^https?:\/\//i.test(cta.href);
+
   const logoHref = items?.[0]?.href || "#";
 
   const LogoInner = logo ? (
@@ -436,10 +441,10 @@ const PillNav: React.FC<PillNavProps> = ({
 
         {/* Résumé CTA — aura accent pill (desktop) */}
         {cta && (
-          <a
+          <NextLink
             href={cta.href}
-            target="_blank"
-            rel="noopener noreferrer"
+            target={ctaIsExternal ? "_blank" : undefined}
+            rel={ctaIsExternal ? "noopener noreferrer" : undefined}
             className="hidden items-center gap-2 rounded-full px-5 font-outfit text-[13px] font-semibold uppercase tracking-[0.08em] text-parchment-50 shadow-[0_8px_24px_-10px_rgba(139,92,246,0.8)] transition-transform duration-300 hover:-translate-y-0.5 md:inline-flex"
             style={{
               height: "var(--nav-h)",
@@ -461,7 +466,7 @@ const PillNav: React.FC<PillNavProps> = ({
                 d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
               />
             </svg>
-          </a>
+          </NextLink>
         )}
 
         {/* Hamburger (mobile) */}
@@ -515,16 +520,16 @@ const PillNav: React.FC<PillNavProps> = ({
           })}
           {cta && (
             <li>
-              <a
+              <NextLink
                 href={cta.href}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={ctaIsExternal ? "_blank" : undefined}
+                rel={ctaIsExternal ? "noopener noreferrer" : undefined}
                 className="block rounded-[50px] px-4 py-3 text-center font-outfit text-[15px] font-semibold uppercase tracking-[0.06em] text-parchment-50"
                 style={{ background: "linear-gradient(135deg, #8B5CF6, #06B6D4)" }}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {cta.label}
-              </a>
+              </NextLink>
             </li>
           )}
         </ul>
