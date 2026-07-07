@@ -35,6 +35,11 @@ export interface EditorContextValue {
   // Username availability
   slugError: boolean;
   setSlugError: React.Dispatch<React.SetStateAction<boolean>>;
+  // Required-field validation errors keyed by `user` path (e.g. "basics.label")
+  fieldErrors: Record<string, boolean>;
+  setFieldErrors: React.Dispatch<
+    React.SetStateAction<Record<string, boolean>>
+  >;
   isChecking: boolean;
   isAvailable: boolean;
   setIsAvailable: React.Dispatch<React.SetStateAction<boolean>>;

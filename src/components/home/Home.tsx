@@ -107,6 +107,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false); // Track unsaved changes
   const [slugError, setSlugError] = useState(false);
+  // Required General-Info fields that failed validation on the last save
+  // attempt — keyed by the `user` path so the section can turn them red.
+  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
   const [isChecking, setIsChecking] = useState(false);
   const [errorMessage, setErrorMessage] = useState("Already taken!");
   const [isAvailable, setIsAvailable] = useState(false);
@@ -977,21 +980,39 @@ export default function Home() {
   const handleSaveChanges = async () => {
     console.log("Saving changes...");
 
-    // Required fields must be filled before a portfolio can be saved.
-    const missingFields: string[] = [];
-    if (!user.basics.name?.trim()) missingFields.push("Full name");
-    if (!user.meta.userName?.trim()) missingFields.push("User name");
-    if (!user.basics.label?.trim()) missingFields.push("Your role");
-    if (!user.basics.email?.trim()) missingFields.push("Contact email");
+    // Required fields must be filled before a portfolio can be saved. Track
+    // both a human label (for the toast) and the field key (to turn the
+    // matching input red in the General Info section).
+    const requiredFields: { key: string; label: string; empty: boolean }[] = [
+      { key: "basics.name", label: "Full name", empty: !user.basics.name?.trim() },
+      { key: "meta.userName", label: "User name", empty: !user.meta.userName?.trim() },
+      { key: "basics.label", label: "Your role", empty: !user.basics.label?.trim() },
+      { key: "basics.email", label: "Contact email", empty: !user.basics.email?.trim() },
+    ];
+    const missing = requiredFields.filter((f) => f.empty);
 
-    if (missingFields.length > 0) {
+    if (missing.length > 0) {
+      setFieldErrors(
+        Object.fromEntries(missing.map((f) => [f.key, true])),
+      );
       notify({
         variant: "warning",
         title: "Required fields missing",
-        description: `Please fill in: ${missingFields.join(", ")}.`,
+        description: `Please fill in: ${missing
+          .map((f) => f.label)
+          .join(", ")}.`,
       });
+      // Bring the first empty required field into view so it's obvious which
+      // one needs attention.
+      setSelectedSection("general-info");
+      document
+        .getElementById("general-info")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
+
+    // All required fields present — clear any leftover red state.
+    setFieldErrors({});
 
     // Block saving when the chosen username is taken / reserved.
     if (slugError) {
@@ -1213,6 +1234,8 @@ export default function Home() {
     setInputValueProject,
     slugError,
     setSlugError,
+    fieldErrors,
+    setFieldErrors,
     isChecking,
     isAvailable,
     setIsAvailable,

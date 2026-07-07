@@ -17,6 +17,7 @@ import AnimatedCircularProgressBar from "@/components/magicui/animated-circular-
 import withAuth from "@/utils/authProtect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNotifications } from "@/components/ui/notification";
+import { cn } from "@/lib/utils";
 
 /** Turn an axios/unknown error into a user-facing message, preferring the
  *  backend's `{ error: { message } }` envelope and handling network/timeouts. */
@@ -43,15 +44,31 @@ function Page() {
   const confettiRef = useRef<ConfettiRef>(null);
   const [shopSlug, setShopSlug] = useState("");
   const [slugError, setSlugError] = useState(false);
+  const [slugMissing, setSlugMissing] = useState(false);
   const [oldSlug, setOldSlug] = useState("");
   const [isChecking, setIsChecking] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("Already taken!");
+  const [errorMessage] = useState("Already taken!");
   const [uploadStatus, setUploadStatus] = useState("idle");
   const [resumeUrl, setResumeUrl] = useState("");
   const [aiCreating, setAiCreating] = useState(false);
+  const slugInputRef = useRef<HTMLInputElement>(null);
 
   const [isAvailable, setIsAvailable] = useState(false);
-  const isError = slugError || isChecking;
+  const isError = slugError || isChecking || slugMissing;
+  const displayedErrorMessage = slugMissing
+    ? "Please enter your portfolio domain"
+    : errorMessage;
+
+  // Flag the domain field as required: turn it red, focus and scroll to it so
+  // the user can see exactly which field needs filling.
+  const flagMissingSlug = () => {
+    setSlugMissing(true);
+    slugInputRef.current?.focus();
+    slugInputRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  };
   useEffect(() => {
     const user = getCookie("username");
     if (user) {
@@ -193,7 +210,7 @@ function Page() {
 
   const ManuallyCreate = async () => {
     if (!shopSlug) {
-      alert("Please enter your portfolio domain");
+      flagMissingSlug();
       return;
     }
     const duration = 5 * 1000;
@@ -409,19 +426,15 @@ function Page() {
   };
 
   const generateai = async () => {
+    if (!shopSlug) {
+      flagMissingSlug();
+      return;
+    }
     if (!resumeUrl) {
       notify({
         variant: "warning",
         title: "Resume required",
         description: "Please upload your resume (PDF) to generate your portfolio.",
-      });
-      return;
-    }
-    if (!shopSlug) {
-      notify({
-        variant: "warning",
-        title: "Portfolio domain required",
-        description: "Please enter your portfolio domain.",
       });
       return;
     }
@@ -571,15 +584,28 @@ function Page() {
               className="z-50 inputbar flex w-full max-w-sm justify-center rounded-xl font-outfit text-lg font-semibold text-ink-soft"
               size="lg"
               classNames={{
-                input: "font-semibold text-lg",
-                label: "font-semibold text-base text-ink-soft",
+                input: cn(
+                  "font-semibold text-lg",
+                  isError && "!text-red-600 placeholder:!text-red-400",
+                ),
+                label: cn(
+                  "font-semibold text-base",
+                  isError ? "!text-red-600" : "text-ink-soft",
+                ),
+                inputWrapper: cn(
+                  isError &&
+                    "!bg-red-50 !border-2 !border-red-500 ring-2 ring-red-500/30",
+                ),
+                errorMessage: "!text-red-600 font-medium",
               }}
+              ref={slugInputRef}
               isInvalid={isError}
-              errorMessage={errorMessage}
+              errorMessage={displayedErrorMessage}
               value={shopSlug}
               onBlur={handleBlur}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setSlugError(false);
+                setSlugMissing(false);
                 setShopSlug(e.target.value.toLowerCase().replace(/\s+/g, ""));
               }}
               endContent={
