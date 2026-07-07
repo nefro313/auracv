@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCommonContext } from "@/Common_context";
@@ -48,6 +48,28 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
+  // Account deletion (danger zone)
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  // Set right before our own post-deletion redirect so the beforeunload guard
+  // below doesn't prompt on an intentional navigation.
+  const navigatingAwayRef = useRef(false);
+
+  // While a deletion is in flight, warn the browser before an accidental
+  // reload/close — the operation isn't resumable from a fresh page load.
+  useEffect(() => {
+    if (!deleting) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      if (navigatingAwayRef.current) return; // our own redirect — allow it
+      e.preventDefault();
+      e.returnValue = ""; // Chrome requires a set returnValue to show the prompt
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [deleting]);
+
   useEffect(() => {
     if (!userData?.user?.id) return;
     let active = true;
@@ -61,6 +83,20 @@ export default function Profile() {
       if (!active) return;
 
       if (error || !data || data.length === 0) {
+        // No portfolio row. This is either a fresh account (signed in but hasn't
+        // created a portfolio) or one whose account was just deleted — e.g. the
+        // user reloaded mid-deletion, leaving a stale token in localStorage.
+        // getUser() validates the token against the server: a deleted user no
+        // longer resolves, so we sign the zombie session out and send them to
+        // sign-up; a still-valid user just hasn't built a portfolio yet.
+        const { data: authData } = await supabase.auth.getUser();
+        if (!active) return;
+        if (!authData?.user) {
+          await supabase.auth.signOut().catch(() => {});
+          navigatingAwayRef.current = true;
+          window.location.replace("/signup");
+          return;
+        }
         router.push("/create");
         return;
       }
@@ -83,6 +119,58 @@ export default function Profile() {
       setTimeout(() => setCopied(false), 1800);
     } catch {
       /* clipboard unavailable — ignore */
+    }
+  };
+
+  const closeDeleteModal = () => {
+    if (deleting) return; // don't let the user dismiss mid-request
+    setDeleteOpen(false);
+    setConfirmText("");
+    setDeleteError("");
+  };
+
+  // Typed confirmation must match the username exactly (case-insensitive).
+  const confirmMatches =
+    !!row && confirmText.trim().toLowerCase() === row.userName.toLowerCase();
+
+  const handleDeleteAccount = async () => {
+    if (!confirmMatches || deleting) return;
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      // The session lives in localStorage (browser client), so pass the access
+      // token explicitly — the server verifies this JWT to identify the caller.
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("Your session has expired. Please sign in again.");
+      }
+      const res = await fetch("/api/deleteAccount", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Something went wrong. Please try again.");
+      }
+      // The account is gone. Clear the now-invalid local session best-effort —
+      // never block on it, or a signOut hiccup would strand the user on a page
+      // whose account no longer exists.
+      await supabase.auth.signOut().catch(() => {});
+      // Hard navigation, not router.replace: Common_context caches the (now
+      // deleted) session, so a client-side nav would leave `userData` stale and
+      // /signup would bounce back to a protected route. A full load tears down
+      // that state and re-reads the session (now empty), landing cleanly on
+      // sign-up so the user can start over.
+      navigatingAwayRef.current = true; // this unload is intentional
+      window.location.replace("/signup");
+      return; // navigation underway — keep the button in its "deleting" state
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ? err.message : "Something went wrong.",
+      );
+      setDeleting(false);
     }
   };
 
@@ -330,7 +418,110 @@ export default function Profile() {
             Log out
           </button>
         </div>
+
+        {/* ---------------- Danger zone ---------------- */}
+        <div className="animate-fade-up mt-6 flex flex-col gap-4 rounded-3xl border border-[#B3402A]/25 bg-[#B3402A]/[0.04] px-7 py-5 backdrop-blur-sm [animation-delay:520ms] sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-fraunces text-base font-medium text-[#B3402A]">
+              Delete account
+            </p>
+            <p className="mt-0.5 text-sm font-medium text-ink-mute">
+              Permanently remove your portfolio, résumé, uploaded images, and
+              account. This can&rsquo;t be undone.
+            </p>
+          </div>
+          <button
+            onClick={() => setDeleteOpen(true)}
+            className="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-[#B3402A] px-5 py-2.5 text-sm font-semibold text-parchment-50 transition hover:bg-[#9a3623] sm:self-auto"
+          >
+            <TrashIcon />
+            Delete account
+          </button>
+        </div>
       </div>
+
+      {/* ---------------- Delete confirmation modal ---------------- */}
+      {deleteOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-account-title"
+        >
+          <div
+            aria-hidden
+            onClick={closeDeleteModal}
+            className="absolute inset-0 bg-ink/40 backdrop-blur-sm"
+          />
+          <div className="animate-fade-up relative z-10 w-full max-w-md rounded-3xl border border-ink/10 bg-parchment-50 p-7 shadow-2xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#B3402A]/10 text-[#B3402A]">
+              <TrashIcon />
+            </div>
+            <h2
+              id="delete-account-title"
+              className="mt-4 font-fraunces text-2xl font-medium tracking-tight text-ink"
+            >
+              Delete your account?
+            </h2>
+            <p className="mt-2 text-sm font-medium text-ink-soft">
+              This permanently deletes your portfolio at{" "}
+              <span className="font-semibold text-ink">{profileUrl}</span>, your
+              résumé, uploaded images, and your account. This action cannot be
+              undone.
+            </p>
+
+            <label className="mt-5 block text-sm font-medium text-ink-soft">
+              Type{" "}
+              <span className="font-semibold text-ink">{row?.userName}</span> to
+              confirm
+              <input
+                type="text"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleDeleteAccount();
+                }}
+                disabled={deleting}
+                autoFocus
+                autoComplete="off"
+                spellCheck={false}
+                placeholder={row?.userName}
+                className="mt-2 w-full rounded-2xl border border-ink/15 bg-white/70 px-4 py-2.5 font-medium text-ink outline-none transition focus:border-[#B3402A]/50 focus:ring-2 focus:ring-[#B3402A]/15 disabled:opacity-60"
+              />
+            </label>
+
+            {deleteError && (
+              <p className="mt-3 text-sm font-medium text-[#B3402A]">
+                {deleteError}
+              </p>
+            )}
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                onClick={closeDeleteModal}
+                disabled={deleting}
+                className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-white/70 px-5 py-2.5 text-sm font-semibold text-ink-soft transition hover:border-ink/25 hover:text-ink disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={!confirmMatches || deleting}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#B3402A] px-5 py-2.5 text-sm font-semibold text-parchment-50 transition hover:bg-[#9a3623] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {deleting ? (
+                  <>
+                    <SpinnerIcon />
+                    Deleting…
+                  </>
+                ) : (
+                  "Delete forever"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -461,6 +652,26 @@ const LogoutIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+    />
+  </svg>
+);
+
+const TrashIcon = () => (
+  <svg {...iconProps}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+    />
+  </svg>
+);
+
+const SpinnerIcon = () => (
+  <svg {...iconProps} className="size-4 animate-spin">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
     />
   </svg>
 );

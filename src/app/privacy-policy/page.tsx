@@ -9,7 +9,7 @@ export const metadata = {
     "How AuraCV collects, uses, and protects your information when you create and share your portfolio.",
 };
 
-const LAST_UPDATED = "June 29, 2026";
+const LAST_UPDATED = "July 7, 2026";
 
 function Section({
   title,
@@ -208,6 +208,23 @@ export default function PrivacyPolicyPage() {
             needed to provide the Service. If you delete your account, we remove
             your personal data and portfolio content, except where we are
             required to retain it to comply with legal obligations.
+          </p>
+        </Section>
+
+        <Section title="Deleting Your Account">
+          <p>
+            You can permanently delete your account at any time from your{" "}
+            <strong className="font-semibold text-ink">Profile</strong> page, in
+            the &quot;Delete account&quot; section. Deletion is immediate and
+            irreversible: it removes your published portfolio, your account, and
+            the files you uploaded — including your résumé and any profile or
+            project images — from our database and file storage.
+          </p>
+          <p>
+            Once deleted, your portfolio address (e.g.{" "}
+            <em>yourname.auracv.me</em>) stops resolving and its username becomes
+            available for others to claim. We cannot recover a deleted account,
+            so please export or save anything you want to keep beforehand.
           </p>
         </Section>
 
