@@ -1,4 +1,4 @@
-import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import Link from "next/link";
 import { HackathonDetail } from "@/lib/type";
 
@@ -14,7 +14,7 @@ export function HackathonCard({
   return (
     <li className="relative ml-10 py-6">
       <div className="absolute -left-[3.65rem] top-6 flex items-center justify-center rounded-2xl bg-parchment-100 p-0.5">
-        <ImageWithFallback
+        <ImageWithSkeleton
           src={image}
           alt={title}
           fallback={title[0]}
