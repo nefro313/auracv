@@ -1,6 +1,6 @@
 [project]
 name = "auracv-resume-backend"
-version = "0.1.0"
+version = "2.0.0"
 description = "Resume/profile -> portfolio JSON extraction API for AuraCV"
 readme = "README.md"
 requires-python = ">=3.12"

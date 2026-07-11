@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import Marquee from "@/components/magicui/marquee";
+import Image from "next/image";
 import Link from "next/link";
 
 const reviews = [
@@ -63,11 +64,11 @@ const ReviewCard = ({
         className="flex flex-row items-center justify-between gap-2"
       >
         <div className="flex flex-row items-center gap-3">
-          <img
+          <Image
             className="rounded-full ring-1 ring-ink/10"
-            width="32"
-            height="32"
-            alt={name}
+            width={32}
+            height={32}
+            alt={`${name}'s portfolio`}
             src={img}
           />
           <div className="flex flex-col">

@@ -1,36 +1,53 @@
 import type { MetadataRoute } from "next";
+import { portfolioOrigin, siteConfig } from "@/config/site";
+import { resolveTenant } from "@/lib/seo/host";
+import { getPublicProfileTimestamp } from "@/lib/public-profile";
 
-const BASE = "https://auracv.me";
+/**
+ * Host-aware: a sitemap may only list URLs on its own host, so the marketing
+ * host lists its indexable pages while each <username>.auracv.me host lists
+ * that portfolio's two pages (with a real lastModified from the user row).
+ * Auth-gated app pages are noindexed and intentionally omitted.
+ */
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const tenant = await resolveTenant();
 
-// Marketing/root pages only. Public portfolios live on their own
-// <username>.auracv.me hosts — a sitemap may only list URLs on its own host,
-// so those pages are surfaced through per-portfolio metadata (see the root
-// layout) rather than here. Auth-gated app pages are intentionally omitted.
-export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
+  if (tenant.kind === "portfolio") {
+    const row = await getPublicProfileTimestamp(tenant.slug);
+    // Unclaimed subdomain — nothing to index here.
+    if (!row) return [];
+
+    const origin = portfolioOrigin(tenant.slug);
+    const lastModified = row.updatedAt ? new Date(row.updatedAt) : undefined;
+    return [
+      {
+        url: `${origin}/`,
+        lastModified,
+        changeFrequency: "weekly",
+        priority: 1,
+      },
+      {
+        url: `${origin}/resume`,
+        lastModified,
+        changeFrequency: "monthly",
+        priority: 0.8,
+      },
+    ];
+  }
 
   return [
     {
-      url: `${BASE}/`,
-      lastModified,
+      url: `${siteConfig.url}/`,
       changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: `${BASE}/signup`,
-      lastModified,
+      url: `${siteConfig.url}/signup`,
       changeFrequency: "monthly",
-      priority: 0.9,
+      priority: 0.6,
     },
     {
-      url: `${BASE}/login`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE}/privacy-policy`,
-      lastModified,
+      url: `${siteConfig.url}/privacy-policy`,
       changeFrequency: "yearly",
       priority: 0.3,
     },
