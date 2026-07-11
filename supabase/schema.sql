@@ -16,7 +16,6 @@ create table if not exists public.users (
   "userEmail" text,
   "resumeJson" jsonb,
   "metaJson"   jsonb,
-  "githubWrap" jsonb,
   "createdAt" timestamptz not null default now(),
   "updatedAt" timestamptz not null default now(),
 
