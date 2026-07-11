@@ -9,7 +9,7 @@ import {
 } from "react";
 import { supabase } from "@/utils/supabase/client";
 import { useCommonContext } from "@/CommonContext";
-import { UserProfile } from "@/lib/type";
+import { UserProfile } from "@/lib/user.types";
 import { cn, profileCompleteness, skillCount } from "@/lib/utils";
 import NumberTicker from "@/components/magicui/number-ticker";
 

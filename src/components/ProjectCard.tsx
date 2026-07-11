@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Markdown from "react-markdown";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { ProjectDetail } from "@/lib/type";
+import { ProjectDetail } from "@/lib/user.types";
 import { externalHref } from "@/lib/utils";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 

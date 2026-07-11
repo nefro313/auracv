@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import ResumeTemplate from "@/components/design/resume_template";
+import ResumeTemplate from "@/components/design/ResumeTemplate";
 import { getPublicProfile } from "@/lib/public-profile";
 import { resolveTenant } from "@/lib/seo/host";
 import { portfolioMetadata } from "@/lib/seo/metadata";

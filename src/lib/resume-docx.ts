@@ -2,7 +2,7 @@
  * Builds a clean, ATS-friendly Word (.docx) version of a resume from the same
  * `UserProfile` the on-page template renders, then triggers a browser download.
  *
- * Mirrors the section order of `resume_template.tsx` so the Word file and the
+ * Mirrors the section order of `ResumeTemplate.tsx` so the Word file and the
  * page stay in lock-step. Runs client-side only (uses Blob + DOM download).
  */
 import {
@@ -16,7 +16,7 @@ import {
   type IParagraphOptions,
   type IRunOptions,
 } from "docx";
-import { UserProfile } from "./type";
+import { UserProfile } from "./user.types";
 import { externalHref } from "./utils";
 
 // Atelier-Paper ink palette, as Word-friendly hex (no leading #).

@@ -2,7 +2,7 @@
 
 import { Chip, Input, Kbd, Spinner, Switch, Textarea } from "@nextui-org/react";
 import { ChangeEvent } from "react";
-import { UserMetaData } from "@/lib/type";
+import { UserMetaData } from "@/lib/user.types";
 import { cn, tailwindColors } from "@/lib/utils";
 import { ACCEPTED_IMAGE_INPUT } from "../constants";
 import { useEditor } from "../EditorContext";
