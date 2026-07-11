@@ -6,7 +6,7 @@ import { Input } from "@nextui-org/react";
 import type { ConfettiRef } from "@/components/magicui/confetti";
 import { supabase } from "@/utils/supabase/client";
 import { setCookie } from "cookies-next/client";
-import { useCommonContext } from "@/Common_context";
+import { useCommonContext } from "@/CommonContext";
 import { useRouter } from "next/navigation";
 import { reservedWords } from "@/lib/type";
 import axios from "axios";

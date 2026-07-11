@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { supabase } from "@/utils/supabase/client";
-import { useCommonContext } from "@/Common_context";
+import { useCommonContext } from "@/CommonContext";
 import { UserProfile } from "@/lib/type";
 import { cn, profileCompleteness, skillCount } from "@/lib/utils";
 import NumberTicker from "@/components/magicui/number-ticker";

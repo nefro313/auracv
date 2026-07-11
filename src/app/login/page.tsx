@@ -4,7 +4,7 @@ import { AuraLogo } from "@/components/brand/logo";
 import Link from "next/link";
 import { Spinner } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
-import { useCommonContext } from "@/Common_context";
+import { useCommonContext } from "@/CommonContext";
 
 export default function Page() {
   const [loading, setLoading] = useState(false);

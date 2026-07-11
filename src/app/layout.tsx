@@ -5,7 +5,7 @@ import "./globals.css";
 import { DM_Sans, Outfit, Quattrocento, Fraunces } from "next/font/google";
 import { headers } from "next/headers";
 import { Providers } from "./providers";
-import { CommonContextProvider } from "@/Common_context";
+import { CommonContextProvider } from "@/CommonContext";
 import { supabase } from "@/utils/supabase/supabase_service";
 import { UserProfile } from "@/lib/type";
 import { Analytics } from "@vercel/analytics/react";

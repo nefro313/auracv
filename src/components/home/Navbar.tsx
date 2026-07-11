@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuraLogo } from "@/components/brand/logo";
 import { Button, Snippet } from "@nextui-org/react";
-import { CommonContext } from "@/Common_context";
+import { CommonContext } from "@/CommonContext";
 import { supabase } from "@/utils/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
