@@ -1,14 +1,14 @@
 import React from "react";
-import { HackathonCard } from "@/components/hackathon-card";
-import { ProjectCard } from "@/components/project-card";
-import { ResumeCard } from "@/components/resume-card";
-import { EducationCard } from "@/components/education-card";
+import { HackathonCard } from "@/components/HackathonCard";
+import { ProjectCard } from "@/components/ProjectCard";
+import { ResumeCard } from "@/components/ResumeCard";
+import { EducationCard } from "@/components/EducationCard";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { tailwindColors, externalHref, faviconUrl } from "@/lib/utils";
-import { UserProfile } from "@/lib/type";
-import { AwardCard } from "@/components/award-card";
+import { UserProfile } from "@/lib/user.types";
+import { AwardCard } from "@/components/AwardCard";
 import PillNav from "@/components/ui/pill-nav";
 import { Reveal } from "@/components/ui/reveal";
 
@@ -189,6 +189,8 @@ export default function Page({
               socialMediaImages.default
             }
             alt=""
+            loading="lazy"
+            decoding="async"
             className="size-5 object-contain"
           />
         ),
@@ -292,6 +294,7 @@ export default function Page({
           <ImageWithSkeleton
             src={user.meta.avatarUrl}
             alt={user.basics.name}
+            priority
             wrapperClassName="size-24 rounded-full border border-ink/10 shadow-[0_18px_50px_-22px_rgba(33,27,18,0.5)] ring-4 ring-white"
             imgClassName="rounded-full object-cover object-top"
             fallback={
@@ -677,6 +680,8 @@ export default function Page({
                             socialMediaImages.default
                           }
                           alt={`${profile.network} icon`}
+                          loading="lazy"
+                          decoding="async"
                           className="size-5 brightness-0 invert"
                         />
                       </Link>
@@ -780,6 +785,8 @@ export default function Page({
                             socialMediaImages.default
                           }
                           alt={`${profile.network} icon`}
+                          loading="lazy"
+                          decoding="async"
                           className="size-4 object-contain opacity-70"
                         />
                       </Link>

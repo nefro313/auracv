@@ -1,5 +1,5 @@
 import React from "react";
-import { UserProfile } from "@/lib/type";
+import { UserProfile } from "@/lib/user.types";
 import { externalHref } from "@/lib/utils";
 import ResumeActions from "./ResumeActions";
 

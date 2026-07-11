@@ -1,6 +1,6 @@
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import Link from "next/link";
-import { HackathonDetail } from "@/lib/type";
+import { HackathonDetail } from "@/lib/user.types";
 
 export function HackathonCard({
   title,

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCommonContext } from "@/CommonContext";
 import { supabase } from "@/utils/supabase/client";
-import { UserProfile } from "@/lib/type";
+import { UserProfile } from "@/lib/user.types";
 import {
   externalHref,
   faviconUrl,

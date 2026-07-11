@@ -1,4 +1,4 @@
-import { UserMetaData, UserProfile } from "@/lib/type";
+import { UserMetaData, UserProfile } from "@/lib/user.types";
 
 /**
  * Local autosave for the studio editor.

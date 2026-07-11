@@ -1,83 +1,42 @@
-import Hero from "@/components/landingpage/Hero";
-import { headers } from "next/headers";
-import { UserProfile } from "@/lib/type";
-import ResumeTemplate from "@/components/design/resume_template";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import ResumeTemplate from "@/components/design/ResumeTemplate";
 import { getPublicProfile } from "@/lib/public-profile";
+import { resolveTenant } from "@/lib/seo/host";
+import { portfolioMetadata } from "@/lib/seo/metadata";
+import { profilePageJsonLd } from "@/lib/seo/jsonld";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { portfolioOrigin } from "@/config/site";
 
-const LANDING_PAGES = ["www", "auracv", "localhost:3000"] as const;
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await resolveTenant();
+  if (tenant.kind === "marketing") return {};
 
-function generateJsonLd(user: UserProfile) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: user.basics.name,
-    url: user.basics.website,
-    image: user.basics.avatarUrl,
-    description: user.basics.about,
-    sameAs: user.basics.profiles.map((profile) => profile.url).filter(Boolean),
-    worksFor:
-      user.work.length > 0
-        ? {
-            "@type": "Organization",
-            name: user.work[0].name,
-          }
-        : undefined,
-    jobTitle: user.work.length > 0 ? user.work[0].position : undefined,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": user.basics.website,
-    },
-    education: user.education.map((edu) => ({
-      "@type": "EducationalOrganization",
-      name: edu.institution,
-      degree: edu.studyType,
-      startDate: edu.startDate,
-      endDate: edu.endDate,
-    })),
-    experience: user.work.map((work) => ({
-      "@type": "Organization",
-      name: work.name,
-      jobTitle: work.position,
-      startDate: work.startDate,
-      endDate: work.endDate,
-    })),
-    project: user.projects.projects.map((project) => ({
-      "@type": "CreativeWork",
-      name: project.title,
-      description: project.description,
-      url: project.website,
-    })),
-    award: user.hackathons.hackathons.map((hackathon) => ({
-      "@type": "Award",
-      name: hackathon.title,
-      description: hackathon.description,
-    })),
-  };
+  const user = await getPublicProfile(tenant.slug);
+  if (!user) return {};
+  return portfolioMetadata(user, "resume");
 }
 
-export default async function IndexPage() {
-  const headersList = await headers();
-  const pathname = headersList.get("x-current-path")?.split(".")[0] || "";
+export default async function ResumePage() {
+  const tenant = await resolveTenant();
 
-  if (LANDING_PAGES.includes(pathname as (typeof LANDING_PAGES)[number])) {
-    return <Hero />;
-  }
+  // /resume only exists on a published portfolio. On the marketing host (and
+  // on unclaimed subdomains) this page used to render a full copy of the
+  // landing page — an indexable duplicate. Send those visitors home instead.
+  if (tenant.kind === "marketing") redirect("/");
 
-  const user = await getPublicProfile(pathname);
-
-  if (!user) {
-    return <Hero />;
-  }
-
-  const jsonLd = generateJsonLd(user);
+  const user = await getPublicProfile(tenant.slug);
+  if (!user) redirect("/");
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd
+        data={profilePageJsonLd(
+          user,
+          portfolioOrigin(user.meta.userName),
+          "/resume",
+        )}
       />
-
       <ResumeTemplate profile={user} />
     </>
   );

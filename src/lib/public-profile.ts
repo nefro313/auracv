@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-import { UserProfile } from "@/lib/type";
+import { cache } from "react";
+import { UserProfile } from "@/lib/user.types";
 
 /**
  * Read-only Supabase client for public portfolio data. Uses the anon key —
@@ -16,24 +17,47 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
 );
 
-export async function getPublicProfile(
-  username: string,
-): Promise<UserProfile | null> {
-  if (!username) return null;
+/**
+ * Wrapped in `React.cache` so `generateMetadata` and the page body share one
+ * query per request instead of hitting Supabase separately.
+ */
+export const getPublicProfile = cache(
+  async (username: string): Promise<UserProfile | null> => {
+    if (!username) return null;
 
-  const { data, error } = await supabase
-    .from("users")
-    .select("resumeJson")
-    .eq("userName", username)
-    .single();
+    const { data, error } = await supabase
+      .from("users")
+      .select("resumeJson")
+      .eq("userName", username)
+      .single();
 
-  if (error || !data?.resumeJson) {
-    if (error && error.code !== "PGRST116") {
-      // PGRST116 = no rows — an unknown subdomain, not a real failure.
-      console.error("Error fetching public profile:", error);
+    if (error || !data?.resumeJson) {
+      if (error && error.code !== "PGRST116") {
+        // PGRST116 = no rows — an unknown subdomain, not a real failure.
+        console.error("Error fetching public profile:", error);
+      }
+      return null;
     }
-    return null;
-  }
 
-  return data.resumeJson as UserProfile;
-}
+    return data.resumeJson as UserProfile;
+  },
+);
+
+/**
+ * Existence + last-modified check without pulling the whole resume JSON —
+ * used by the per-portfolio sitemap.
+ */
+export const getPublicProfileTimestamp = cache(
+  async (username: string): Promise<{ updatedAt: string | null } | null> => {
+    if (!username) return null;
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("updatedAt")
+      .eq("userName", username)
+      .single();
+
+    if (error || !data) return null;
+    return { updatedAt: (data as { updatedAt: string | null }).updatedAt };
+  },
+);

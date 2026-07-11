@@ -7,7 +7,7 @@ import {
   PhotoTypes,
   UserMetaData,
   UserProfile,
-} from "@/lib/type";
+} from "@/lib/user.types";
 
 type SetUser = React.Dispatch<React.SetStateAction<UserProfile>>;
 

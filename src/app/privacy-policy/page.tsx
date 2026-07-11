@@ -1,13 +1,16 @@
 import Link from "next/link";
 import React from "react";
+import type { Metadata } from "next";
 
 import { AuraLogo } from "@/components/brand/logo";
+import { staticPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata = {
-  title: "Privacy Policy — AuraCV",
+export const metadata: Metadata = staticPageMetadata({
+  title: "Privacy Policy",
   description:
     "How AuraCV collects, uses, and protects your information when you create and share your portfolio.",
-};
+  path: "/privacy-policy",
+});
 
 const LAST_UPDATED = "July 7, 2026";
 
