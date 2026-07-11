@@ -46,7 +46,6 @@ function Page() {
   const [slugError, setSlugError] = useState(false);
   const [slugMissing, setSlugMissing] = useState(false);
   const [oldSlug, setOldSlug] = useState("");
-  const [isChecking, setIsChecking] = useState(false);
   const [errorMessage] = useState("Already taken!");
   const [uploadStatus, setUploadStatus] = useState("idle");
   const [resumeUrl, setResumeUrl] = useState("");
@@ -54,7 +53,7 @@ function Page() {
   const slugInputRef = useRef<HTMLInputElement>(null);
 
   const [isAvailable, setIsAvailable] = useState(false);
-  const isError = slugError || isChecking || slugMissing;
+  const isError = slugError || slugMissing;
   const displayedErrorMessage = slugMissing
     ? "Please enter your portfolio domain"
     : errorMessage;
@@ -99,10 +98,7 @@ function Page() {
   };
 
   const handleBlur = async () => {
-    setIsChecking(true);
-
     const isUnique = await checkSlugUnique(shopSlug);
-    setIsChecking(false);
     if (shopSlug === "") {
       setIsAvailable(false);
     }
@@ -115,20 +111,19 @@ function Page() {
   const [value, setValue] = useState(0);
 
   useEffect(() => {
-    if (aiCreating) {
-      const handleIncrement = (prev: any) => {
-        if (prev >= 100) {
-          return 0;
-        }
-        return prev + 10;
-      };
-
-      const interval = setInterval(() => setValue(handleIncrement), 2700);
-
-      return () => clearInterval(interval);
-    } else {
+    if (!aiCreating) {
       setValue(100);
+      return;
     }
+    // Single, monotonic progress: creep up to 90% while the resume is being
+    // extracted/parsed, then hold there until generateai sets it to 100 on
+    // completion. Never resets to 0, so the bar only ever fills once.
+    setValue(0);
+    const interval = setInterval(() => {
+      setValue((prev) => (prev >= 90 ? prev : prev + 10));
+    }, 1200);
+
+    return () => clearInterval(interval);
   }, [aiCreating]);
 
   useEffect(() => {
@@ -451,7 +446,6 @@ function Page() {
         );
         console.log("AI Generated Result:", response);
         const result = response.data;
-        setValue(80);
         // result.userName = shopSlug;
         // result.avatarUrl = userData?.user_metadata.avatarUrl;
         // result.userId = userData?.user.id;
@@ -620,7 +614,7 @@ function Page() {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="size-6 text-aura-cyan"
+                      className="size-6 text-green-500"
                     >
                       <path
                         strokeLinecap="round"
