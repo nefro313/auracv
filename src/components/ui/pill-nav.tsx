@@ -475,20 +475,19 @@ const PillNav: React.FC<PillNavProps> = ({
           onClick={toggleMobileMenu}
           aria-label="Toggle menu"
           aria-expanded={isMobileMenuOpen}
-          className="relative flex cursor-pointer flex-col items-center justify-center gap-1 rounded-full border-0 p-0 md:hidden"
+          className="relative flex cursor-pointer flex-col items-center justify-center gap-1 rounded-full border border-white/50 bg-white/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] backdrop-blur-md md:hidden"
           style={{
             width: "var(--nav-h)",
             height: "var(--nav-h)",
-            background: "var(--base)",
           }}
         >
           <span
             className="hamburger-line h-0.5 w-4 origin-center rounded"
-            style={{ background: "var(--pill-bg)" }}
+            style={{ background: "var(--base)" }}
           />
           <span
             className="hamburger-line h-0.5 w-4 origin-center rounded"
-            style={{ background: "var(--pill-bg)" }}
+            style={{ background: "var(--base)" }}
           />
         </button>
       </nav>
@@ -496,8 +495,16 @@ const PillNav: React.FC<PillNavProps> = ({
       {/* Mobile menu */}
       <div
         ref={mobileMenuRef}
-        className="absolute left-0 right-0 top-[3.6em] origin-top rounded-[27px] shadow-[0_12px_40px_-16px_rgba(33,27,18,0.5)] md:hidden"
-        style={{ ...cssVars, background: "var(--base)" }}
+        className="absolute left-0 right-0 top-[3.8em] origin-top rounded-[27px] border border-white/40 shadow-[0_18px_50px_-20px_rgba(33,27,18,0.45),inset_0_1px_0_0_rgba(255,255,255,0.7)] backdrop-blur-xl backdrop-saturate-150 md:hidden"
+        // Hidden from the first paint so the menu never flashes open on
+        // reload (GSAP hides it in an effect, which only runs after paint —
+        // this closes that gap). GSAP then owns visibility/opacity on toggle.
+        style={{
+          ...cssVars,
+          background: "rgba(252, 250, 245, 0.6)",
+          visibility: "hidden",
+          opacity: 0,
+        }}
       >
         <ul className="m-0 flex list-none flex-col gap-[4px] p-[4px]">
           {items.map((item) => {
@@ -508,7 +515,7 @@ const PillNav: React.FC<PillNavProps> = ({
                   href={item.href}
                   className="block rounded-[50px] px-4 py-3 font-outfit text-[15px] font-semibold uppercase tracking-[0.06em] transition-colors duration-200"
                   style={{
-                    background: isActive ? "var(--base)" : "var(--pill-bg)",
+                    background: isActive ? "var(--base)" : "transparent",
                     color: isActive ? "var(--hover-text)" : "var(--pill-text)",
                   }}
                   onClick={() => setIsMobileMenuOpen(false)}
