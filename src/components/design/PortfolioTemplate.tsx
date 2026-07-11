@@ -1,14 +1,14 @@
 import React from "react";
-import { HackathonCard } from "@/components/hackathon-card";
-import { ProjectCard } from "@/components/project-card";
-import { ResumeCard } from "@/components/resume-card";
-import { EducationCard } from "@/components/education-card";
+import { HackathonCard } from "@/components/HackathonCard";
+import { ProjectCard } from "@/components/ProjectCard";
+import { ResumeCard } from "@/components/ResumeCard";
+import { EducationCard } from "@/components/EducationCard";
 import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { tailwindColors, externalHref, faviconUrl } from "@/lib/utils";
-import { UserProfile } from "@/lib/type";
-import { AwardCard } from "@/components/award-card";
+import { UserProfile } from "@/lib/user.types";
+import { AwardCard } from "@/components/AwardCard";
 import PillNav from "@/components/ui/pill-nav";
 import { Reveal } from "@/components/ui/reveal";
 

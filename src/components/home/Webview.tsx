@@ -1,7 +1,7 @@
 import React from "react";
 import Home from "./Home";
 import Navbar from "./Navbar";
-import Left_panel from "./Left_panel";
+import LeftPanel from "./LeftPanel";
 
 export default function Webview() {
   return (
@@ -11,7 +11,7 @@ export default function Webview() {
 
         <div className="grid min-h-0 flex-1 grid-cols-12">
           <div className="col-span-1 min-h-0 overflow-y-auto">
-            <Left_panel />
+            <LeftPanel />
           </div>
           <div className="col-span-11 flex min-h-0 flex-col border-l border-ink/10">
             <Home />

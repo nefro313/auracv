@@ -1,6 +1,6 @@
 "use client";
 import Webview from "@/components/home/Webview";
-import Mob_view from "@/components/home/mobile/Mob_view";
+import MobileView from "@/components/home/mobile/MobileView";
 import WelcomeBack from "@/components/home/WelcomeBack";
 import withAuth from "@/utils/authProtect";
 import React, { useEffect, useState } from "react";
@@ -32,7 +32,7 @@ function Page() {
     <div className="min-h-screen bg-parchment-100 font-outfit text-ink antialiased">
       {showWelcome && <WelcomeBack onFinish={() => setShowWelcome(false)} />}
       <Webview />
-      <Mob_view />
+      <MobileView />
     </div>
   );
 }

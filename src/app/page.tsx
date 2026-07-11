@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Hero from "@/components/landingpage/Hero";
 import UnclaimedSlug from "@/components/landingpage/UnclaimedSlug";
-import Temp_1 from "@/components/design/temp_1";
-import { reservedWords } from "@/lib/type";
+import PortfolioTemplate from "@/components/design/PortfolioTemplate";
+import { reservedWords } from "@/lib/user.types";
 import { getPublicProfile } from "@/lib/public-profile";
 import { resolveTenant } from "@/lib/seo/host";
 import {
@@ -57,7 +57,7 @@ export default async function IndexPage() {
   return (
     <>
       <JsonLd data={profilePageJsonLd(user, portfolioOrigin(user.meta.userName))} />
-      <Temp_1 user={user} />
+      <PortfolioTemplate user={user} />
     </>
   );
 }

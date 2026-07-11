@@ -1,7 +1,7 @@
 "use client";
 
 import Navbar from "@/components/home/Navbar";
-import Left_panel from "@/components/home/Left_panel";
+import LeftPanel from "@/components/home/LeftPanel";
 import Profile from "@/components/profile/Profile";
 import withAuth from "@/utils/authProtect";
 
@@ -13,7 +13,7 @@ function Page() {
       {/* Desktop: rail + content. Phone/tablet: content only (nav lives in the Navbar). */}
       <div className="grid grid-cols-12">
         <aside className="hidden lg:col-span-1 lg:block">
-          <Left_panel />
+          <LeftPanel />
         </aside>
         <main className="col-span-12 border-ink/10 lg:col-span-11 lg:border-l">
           <Profile />

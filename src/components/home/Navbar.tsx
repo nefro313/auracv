@@ -16,7 +16,7 @@ export default function Navbar() {
   const [user, setUser] = useState<any>("");
   const pathname = usePathname();
 
-  // Page nav shown only on phones/tablets — desktop has the Left_panel rail.
+  // Page nav shown only on phones/tablets — desktop has the LeftPanel rail.
   const pageNavClass = (href: string, exact = false) => {
     const active = exact ? pathname === href : pathname?.startsWith(href);
     return `flex h-11 w-11 items-center justify-center rounded-full transition-colors ${

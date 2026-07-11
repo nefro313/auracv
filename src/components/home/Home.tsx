@@ -25,16 +25,16 @@ import {
   PhotoTypes,
   reservedWords,
   UserMetaData,
-} from "@/lib/type";
+} from "@/lib/user.types";
 import { supabase } from "@/utils/supabase/client";
 import { useCommonContext } from "@/CommonContext";
 import imageCompression from "browser-image-compression";
 import { useNotifications } from "@/components/ui/notification";
 import { StudioSkeleton } from "@/components/ui/skeletons";
-import Temp1 from "@/components/design/temp_1";
+import PortfolioTemplate from "@/components/design/PortfolioTemplate";
 import { useRouter } from "next/navigation";
 import { initialUserState } from "@/lib/utils";
-import ResumeTemplate from "@/components/design/resume_template";
+import ResumeTemplate from "@/components/design/ResumeTemplate";
 import { validateImageFile } from "./editor/constants";
 import { useUndoableState } from "./editor/useUndoableState";
 import {
@@ -1907,7 +1907,7 @@ export default function Home() {
             fullWidth
           >
             <Tab key="template1" className="p-0" title="Portfolio">
-              <Temp1 user={user} preview />
+              <PortfolioTemplate user={user} preview />
             </Tab>
             <Tab key="template2" className="p-0" title="Resume">
               <ResumeTemplate profile={user} preview />

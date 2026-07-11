@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { supabase } from "@/utils/supabase/supabase_service";
+import { supabase } from "@/utils/supabase/supabase.service";
 import { MARK_DATA_URI } from "@/components/brand/mark";
 import { resolveTenant } from "@/lib/seo/host";
 
