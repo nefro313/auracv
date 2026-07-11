@@ -1,0 +1,21 @@
+# AuraCV
+
+> AuraCV turns a resume into a personal portfolio website. Upload a resume PDF (or an exported LinkedIn profile PDF) and AI extracts your experience, projects, skills, and education into a polished, editable portfolio hosted at your-name.auracv.me.
+
+AuraCV is a portfolio builder for professionals, developers, and creatives. You sign in with Google, upload a resume or LinkedIn-as-PDF, and the AI generates a structured portfolio you can edit in the studio and publish on your own subdomain. Portfolios include an About section, work experience, projects, education, skills, and links, and can also expose a downloadable resume.
+
+## Pages
+- [Home](https://auracv.me/): Product overview and getting started.
+- [Sign up](https://auracv.me/signup): Create an account with Google to build a portfolio.
+- [Sign in](https://auracv.me/login): Access an existing account and the studio editor.
+- [Privacy policy](https://auracv.me/privacy-policy): How account and portfolio data is handled, including account deletion.
+
+## How it works
+- Sign in with Google, then upload a resume (PDF) or a LinkedIn profile exported as PDF.
+- AI extraction parses the document into a structured portfolio.
+- Edit content, theme, and colours in the studio, then publish.
+- Each published portfolio is served at https://<username>.auracv.me.
+
+## Notes
+- Portfolios live on per-user subdomains (https://<username>.auracv.me), not under path segments on the root domain.
+- LinkedIn is imported via its exported PDF; there is no direct profile-URL import.
