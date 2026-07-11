@@ -63,7 +63,7 @@ export function CommonContextProvider({
         console.error("Error logging out:", error.message);
         return;
       }
-      // Ensure the user session is cleared before redirecting
+
       setUser(null);
       // Redrecting to the login page after logout
       router.push("/login");
