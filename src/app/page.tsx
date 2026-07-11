@@ -1,7 +1,8 @@
 import Hero from "@/components/landingpage/Hero";
+import UnclaimedSlug from "@/components/landingpage/UnclaimedSlug";
 import Temp_1 from "@/components/design/temp_1";
 import { headers } from "next/headers";
-import { UserProfile } from "@/lib/type";
+import { UserProfile, reservedWords } from "@/lib/type";
 import { getPublicProfile } from "@/lib/public-profile";
 
 const LANDING_PAGES = ["www", "auracv", "localhost:3000"] as const;
@@ -65,7 +66,12 @@ export default async function IndexPage() {
   const data = await getPublicProfile(pathname);
 
   if (!data) {
-    return <Hero />;
+    // The subdomain resolves to no portfolio. Rather than dumping the visitor
+    // on the landing page, invite them to claim this exact address. Reserved
+    // slugs (a valid AuraCV subdomain always matches `^[a-z0-9-]+$`) can't be
+    // registered, so we flag those as unavailable.
+    const claimable = !reservedWords.includes(pathname);
+    return <UnclaimedSlug slug={pathname} claimable={claimable} />;
   }
   const jsonLd = generateJsonLd(data);
 

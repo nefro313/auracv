@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuraLogo } from "@/components/brand/logo";
 import Link from "next/link";
 import { Spinner } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
+import { setCookie } from "cookies-next/client";
 import { useCommonContext } from "@/Common_context";
 
 export default function Page() {
@@ -13,6 +14,18 @@ export default function Page() {
   if (userData) {
     router.push("/studio");
   }
+
+  // Arriving from an unclaimed-address page (`/signup?claim=<slug>`): stash the
+  // chosen address so the create flow prefills it once OAuth completes.
+  useEffect(() => {
+    const claim = new URLSearchParams(window.location.search)
+      .get("claim")
+      ?.toLowerCase()
+      .replace(/\s+/g, "");
+    if (claim) {
+      setCookie("username", claim, { maxAge: 60 * 60 * 24 * 100 });
+    }
+  }, []);
   const SigninWithGoogle = async () => {
     setLoading(true);
     try {

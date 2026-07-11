@@ -6,7 +6,6 @@ import { DM_Sans, Outfit, Quattrocento, Fraunces } from "next/font/google";
 import { headers } from "next/headers";
 import { Providers } from "./providers";
 import { CommonContextProvider } from "@/Common_context";
-import { redirect } from "next/navigation";
 import { supabase } from "@/utils/supabase/supabase_service";
 import { UserProfile } from "@/lib/type";
 import { Analytics } from "@vercel/analytics/react";
@@ -50,7 +49,10 @@ async function getUser(auracv: string): Promise<UserProfile | null> {
       .single();
 
     if (userError) {
-      redirect("https://auracv.me");
+      // Unknown subdomain — no portfolio here. Return null so the page can
+      // render the "claim this address" invitation instead of bouncing the
+      // visitor back to the landing page.
+      return null;
     }
     const user: any = {
       meta: {

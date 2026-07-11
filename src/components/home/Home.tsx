@@ -124,9 +124,6 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState("Already taken!");
   const [isAvailable, setIsAvailable] = useState(false);
   const [userMetaData, setUserMetaData] = useState<any>(null);
-  const [githubData, setGithubData] = useState<any>(null);
-  const [githubUsername, setGithubUsername] = useState("");
-  const [githubLoading, setGithubLoading] = useState(false);
   const router = useRouter();
   const { notify, viewport: notificationViewport } = useNotifications();
 
@@ -167,7 +164,6 @@ export default function Home() {
           const serverMeta: UserMetaData = data[0].metaJson;
 
           setUserMetaData(serverMeta);
-          setGithubData(data[0].githubWrap);
           // Loaded profile is the history baseline — no undo into empty state.
           resetUserHistory(serverResume);
           setInitialUser(JSON.parse(JSON.stringify(serverResume))); // Deep clone
@@ -1268,32 +1264,6 @@ export default function Home() {
     </Link>
   );
 
-  const handleGithubWrap = async (githubUsername: string) => {
-    console.log("Generating GitHub Wrap...");
-    setGithubLoading(true);
-    const response = await fetch(
-      process.env.NEXT_PUBLIC_API_BASE_URL + "/githubWrap",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ githubUsername: githubUsername }),
-      },
-    );
-    if (response.ok) {
-      console.log("GitHub Wrap generated successfully");
-      setGithubLoading(false);
-      const data = await response.json();
-      setGithubData(data);
-      const { data: githubData, error } = await supabase
-        .from("users")
-        .update({ githubWrap: data })
-        .eq("userId", userData?.user.id);
-    }
-    setGithubLoading(false);
-  };
-
   const editorValue: EditorContextValue = {
     user,
     setUser,
@@ -1505,89 +1475,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-          {/* <div className="flex flex-col bg-parchment-100 gap-4 p-4 sm:p-6 border-b">
-          {githubData === null ? (
-            <div className="flex flex-col gap-4">
-              <h3 className="text-lg sm:text-xl font-bold text-left bg-gradient-to-r from-[#2ea043] to-[#238636] text-transparent bg-clip-text">
-                GitHub 2024 Wrapped
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input
-                  value={githubUsername}
-                  onChange={(e) => setGithubUsername(e.target.value)}
-                  type="text"
-                  placeholder="Enter GitHub username"
-                  className="w-full px-4 flex-1  py-2 text-sm border border-ink/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-aura-violet/40"
-                />
-                <button
-                  onClick={() => handleGithubWrap(githubUsername)}
-                  className="w-full sm:w-auto py-2 flex-1 flex items-center justify-center gap-2 bg-gradient-to-br from-[#2ea043] via-[#238636] to-[#1a7f37] text-white font-medium px-4 text-sm rounded-xl hover:from-[#3fb950] hover:via-[#2ea043] hover:to-[#238636] shadow-lg shadow-green-500/20 transition-all duration-300 animate-gradient-x border border-green-600/20"
-                >
-                  <svg
-                    className="size-5"
-                    viewBox="0 0 16 16"
-                    fill="currentColor"
-                  >
-                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
-                  </svg>
-                  {githubLoading ? "Generating..." : "Create GitHub Wrapped"}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              <h3 className="text-lg sm:text-xl font-bold text-left bg-gradient-to-r from-[#2ea043] to-[#238636] text-transparent bg-clip-text">
-                GitHub 2024 Wrapped
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  href={`https://${user.meta.userName}.auracv.me/github`}
-                  className="w-full py-2 px-4 rounded-xl text-white font-medium text-sm bg-gradient-to-r from-[#2ea043] to-[#238636] hover:from-[#2c974b] hover:to-[#1f7a31] transition-all duration-300 flex items-center justify-center gap-2"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                    />
-                  </svg>
-                  View 2024 Wrapped
-                </Link>
-                <Link href={`/download-wrapped`}>
-                  <Button className="w-full py-3 px-4 rounded-xl text-white font-medium text-sm bg-gradient-to-r from-[#24292f] to-[#1b1f23] hover:from-[#1b1f23] hover:to-[#121417] transition-all duration-300 flex items-center justify-center gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
-                      />
-                    </svg>
-                    Download Wrapped
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          )}
-        </div> */}
           <div className="py-6 px-6 border-b block lg:hidden">
             <div className="flex items-center gap-2">
               <Snippet

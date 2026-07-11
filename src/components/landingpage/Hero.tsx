@@ -8,7 +8,7 @@ import { useCommonContext } from "@/Common_context";
 import { reservedWords } from "@/lib/type";
 import { AuraLogo } from "@/components/brand/logo";
 import { Reveal } from "@/components/ui/reveal";
-import { MarqueeDemo } from "./Marquee";
+import { HeroHighlights } from "./HeroHighlights";
 import { PortfolioCountButton } from "./PortfolioCountButton";
 import Footer from "./Footer";
 
@@ -86,6 +86,28 @@ export default function Hero() {
     setIsAvailable(false);
     setShopSlug(value);
   };
+
+  // Prefill the address when arriving from an unclaimed-subdomain page
+  // (`/?claim=<slug>`) and immediately check that it's still available.
+  useEffect(() => {
+    const claim = new URLSearchParams(window.location.search)
+      .get("claim")
+      ?.toLowerCase()
+      .replace(/\s+/g, "");
+    if (!claim) return;
+    setShopSlug(claim);
+    (async () => {
+      setIsChecking(true);
+      const isUnique = await checkSlugUnique(claim);
+      setIsChecking(false);
+      if (isUnique) {
+        setIsAvailable(true);
+        setCookie("username", claim, { maxAge: 60 * 60 * 24 * 100 });
+      }
+      setSlugError(!isUnique);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="relative min-h-svh overflow-x-clip bg-parchment-100 font-outfit text-ink antialiased">
@@ -231,9 +253,9 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Live portfolios marquee */}
-        <div className="animate-fade-up relative pb-10 [animation-delay:540ms]">
-          <MarqueeDemo />
+        {/* Capability strip (live-portfolios marquee temporarily disabled) */}
+        <div className="animate-fade-up relative px-5 pb-12 [animation-delay:540ms]">
+          <HeroHighlights />
         </div>
       </section>
 
