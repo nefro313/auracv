@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { cache } from "react";
-import { UserProfile } from "@/lib/type";
+import { UserProfile } from "@/lib/user.types";
 
 /**
  * Read-only Supabase client for public portfolio data. Uses the anon key —

@@ -1,5 +1,5 @@
 import { siteConfig } from "@/config/site";
-import type { UserProfile } from "@/lib/type";
+import type { UserProfile } from "@/lib/user.types";
 
 type JsonLd = Record<string, unknown>;
 

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Download, FileText, Loader2 } from "lucide-react";
-import { UserProfile } from "@/lib/type";
+import { UserProfile } from "@/lib/user.types";
 
 /**
  * Download controls for the resume page. PDF uses the browser's native

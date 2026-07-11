@@ -8,7 +8,7 @@ import { supabase } from "@/utils/supabase/client";
 import { setCookie } from "cookies-next/client";
 import { useCommonContext } from "@/CommonContext";
 import { useRouter } from "next/navigation";
-import { reservedWords } from "@/lib/type";
+import { reservedWords } from "@/lib/user.types";
 import axios from "axios";
 import confetti from "canvas-confetti";
 import Navbar from "@/components/create/Navbar";
