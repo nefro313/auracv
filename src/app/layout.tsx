@@ -8,7 +8,8 @@ import { Providers } from "./providers";
 import { CommonContextProvider } from "@/CommonContext";
 import { supabase } from "@/utils/supabase/supabase_service";
 import { UserProfile } from "@/lib/type";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 
 const DM_SansFont = DM_Sans({
@@ -263,6 +264,7 @@ export default function RootLayout({
             <TooltipProvider delayDuration={0}>
               <Providers>
                 {children} <Analytics />
+                <SpeedInsights />
               </Providers>
             </TooltipProvider>
           </ThemeProvider>
