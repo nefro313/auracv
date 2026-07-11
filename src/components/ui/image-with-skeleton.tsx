@@ -18,6 +18,7 @@ export function ImageWithSkeleton({
   wrapperClassName,
   imgClassName,
   fallbackClassName,
+  priority = false,
 }: {
   src?: string | null;
   alt: string;
@@ -25,6 +26,9 @@ export function ImageWithSkeleton({
   wrapperClassName?: string;
   imgClassName?: string;
   fallbackClassName?: string;
+  /** Set for the LCP image (the portfolio avatar) so the browser fetches it
+   *  first; everything else lazy-loads. */
+  priority?: boolean;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -60,6 +64,9 @@ export function ImageWithSkeleton({
           ref={imgRef}
           src={src as string}
           alt={alt}
+          fetchPriority={priority ? "high" : "auto"}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
           onLoad={() => setLoaded(true)}
           onError={() => setError(true)}
           className={cn(

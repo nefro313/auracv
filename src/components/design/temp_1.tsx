@@ -189,6 +189,8 @@ export default function Page({
               socialMediaImages.default
             }
             alt=""
+            loading="lazy"
+            decoding="async"
             className="size-5 object-contain"
           />
         ),
@@ -292,6 +294,7 @@ export default function Page({
           <ImageWithSkeleton
             src={user.meta.avatarUrl}
             alt={user.basics.name}
+            priority
             wrapperClassName="size-24 rounded-full border border-ink/10 shadow-[0_18px_50px_-22px_rgba(33,27,18,0.5)] ring-4 ring-white"
             imgClassName="rounded-full object-cover object-top"
             fallback={
@@ -677,6 +680,8 @@ export default function Page({
                             socialMediaImages.default
                           }
                           alt={`${profile.network} icon`}
+                          loading="lazy"
+                          decoding="async"
                           className="size-5 brightness-0 invert"
                         />
                       </Link>
@@ -780,6 +785,8 @@ export default function Page({
                             socialMediaImages.default
                           }
                           alt={`${profile.network} icon`}
+                          loading="lazy"
+                          decoding="async"
                           className="size-4 object-contain opacity-70"
                         />
                       </Link>
