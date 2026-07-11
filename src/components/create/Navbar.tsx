@@ -4,7 +4,7 @@ import React, { useState, useContext, useEffect } from "react";
 import Link from "next/link";
 import { AuraLogo } from "@/components/brand/logo";
 import { Button } from "@nextui-org/react";
-import { CommonContext } from "@/Common_context";
+import { CommonContext } from "@/CommonContext";
 import { supabase } from "@/utils/supabase/client";
 
 export default function Navbar() {

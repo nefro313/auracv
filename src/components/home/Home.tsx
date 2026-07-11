@@ -27,7 +27,7 @@ import {
   UserMetaData,
 } from "@/lib/type";
 import { supabase } from "@/utils/supabase/client";
-import { useCommonContext } from "@/Common_context";
+import { useCommonContext } from "@/CommonContext";
 import imageCompression from "browser-image-compression";
 import { useNotifications } from "@/components/ui/notification";
 import { StudioSkeleton } from "@/components/ui/skeletons";

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { setCookie } from "cookies-next/client";
-import { useCommonContext } from "@/Common_context";
+import { useCommonContext } from "@/CommonContext";
 import { reservedWords } from "@/lib/type";
 import { AuraLogo } from "@/components/brand/logo";
 import { Reveal } from "@/components/ui/reveal";

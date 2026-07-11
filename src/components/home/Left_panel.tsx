@@ -3,7 +3,7 @@
 import React from "react";
 import { Avatar } from "@nextui-org/react";
 import Link from "next/link";
-import { useCommonContext } from "@/Common_context";
+import { useCommonContext } from "@/CommonContext";
 import { usePathname } from "next/navigation";
 
 export default function LeftPanel() {

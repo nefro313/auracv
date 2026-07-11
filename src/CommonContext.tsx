@@ -24,7 +24,7 @@ export function useCommonContext() {
 
   if (commonData === undefined) {
     throw new Error(
-      "useCommonContext must be used with a CommonContextProvider"
+      "useCommonContext must be used with a CommonContextProvider",
     );
   }
 
@@ -72,7 +72,6 @@ Issues found within the previous logout logic:
     This may result in the page being redirected even if the logout fails, which might be the cause of the page flicker.
   - The user session may still exist when you push the route. Make sure the session is fully cleared before routing.
 */
-
   /* New logout logic
   - The user session is cleared before redirecting to the login page.
   - The user is set to null after logging out.
